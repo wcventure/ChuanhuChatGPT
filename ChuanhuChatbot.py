@@ -11,15 +11,15 @@ from modules.overwrites import *
 from modules.chat_func import *
 from modules.openai_func import get_usage
 
-#os.environ["http_proxy"] = "http://127.0.0.1:7890"
-#os.environ["https_proxy"] = "http://127.0.0.1:7890"
+os.environ["http_proxy"] = "http://192.168.88.110:4780"
+os.environ["https_proxy"] = "http://192.168.88.110:4780"
 
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s",
 )
 
-my_api_key = ""  # 在这里输入你的 API 密钥
+my_api_key = "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"  # 在这里输入你的 API 密钥
 
 # if we are running in Docker
 if os.environ.get("dockerrun") == "yes":
@@ -434,7 +434,6 @@ if __name__ == "__main__":
             )  # 改为 share=True 可以创建公开分享链接
         '''
         demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=7860, share=False) # 可自定义端口
-        #
-        demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=7860, share=False) # 可自定义端口
+        # demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=7860, share=False) # 可自定义端口
         # demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=7860,auth=("在这里填写用户名", "在这里填写密码")) # 可设置用户名与密码
         # demo.queue(concurrency_count=CONCURRENT_COUNT).launch(auth=("在这里填写用户名", "在这里填写密码")) # 适合Nginx反向代理
