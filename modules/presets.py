@@ -29,7 +29,8 @@ CONCURRENT_COUNT = 100 # 允许同时使用的用户数量
 SIM_K = 5
 INDEX_QUERY_TEMPRATURE = 1.0
 
-title = """<h1 align="left" style="min-width:200px; margin-top:0;">川虎ChatGPT 🚀</h1>"""
+title = """<h1 align="left" style="min-width:200px; margin-top:0;">智能化可信软件工程实验室ChatGPT 🚀</h1>"""
+'''
 description = """\
 <div align="center" style="margin:16px 0">
 
@@ -40,6 +41,7 @@ description = """\
 此App使用 `gpt-3.5-turbo` 大语言模型
 </div>
 """
+'''
 
 summarize_prompt = "你是谁？我们刚才聊了什么？"  # 总结对话时的 prompt
 
