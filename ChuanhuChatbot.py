@@ -11,8 +11,8 @@ from modules.overwrites import *
 from modules.chat_func import *
 from modules.openai_func import get_usage
 
-+os.environ["http_proxy"] = "http://127.0.0.1:7890"
-+os.environ["https_proxy"] = "http://127.0.0.1:7890"
+#os.environ["http_proxy"] = "http://127.0.0.1:7890"
+#os.environ["https_proxy"] = "http://127.0.0.1:7890"
 
 logging.basicConfig(
     level=logging.DEBUG,
