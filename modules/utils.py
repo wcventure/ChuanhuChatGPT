@@ -364,7 +364,7 @@ def replace_today(prompt):
 
 
 def get_geoip():
-    response = requests.get("https://ipapi.co/json/", timeout=5)
+    response = requests.get("https://ipapi.co/json/", timeout=10)
     try:
         data = response.json()
     except:
