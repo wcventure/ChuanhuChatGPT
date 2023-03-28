@@ -91,7 +91,8 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                     "🧹 新的对话",
                 )
                 retryBtn = gr.Button("🔄 重新生成")
-                delLastBtn = gr.Button("🗑️ 删除一条对话")
+                delFirstBtn = gr.Button("🗑️ 删除早期历史")
+                delLastBtn = gr.Button("🗑️ 删除最后对话")
                 reduceTokenBtn = gr.Button("♻️ 总结对话")
 
         with gr.Column():
@@ -264,7 +265,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
     transfer_input_args = dict(
         fn=transfer_input, inputs=[user_input], outputs=[user_question, user_input, submitBtn, cancelBtn], show_progress=True
     )
-    
+
     get_usage_args = dict(
         fn=get_usage, inputs=[user_api_key], outputs=[usageTxt], show_progress=False
     )
@@ -304,6 +305,12 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
     ).then(**end_outputing_args)
     retryBtn.click(**get_usage_args)
 
+    delFirstBtn.click(
+        delete_first_conversation,
+        [history, token_count],
+        [history, token_count, status_display],
+    )
+
     delLastBtn.click(
         delete_last_conversation,
         [chatbot, history, token_count],
@@ -321,7 +328,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
             token_count,
             top_p,
             temperature,
-            gr.State(0),
+            gr.State(max_token_streaming//2 if use_streaming_checkbox.value else max_token_all//2),
             model_select_dropdown,
             language_select_dropdown,
         ],
@@ -329,7 +336,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
         show_progress=True,
     )
     reduceTokenBtn.click(**get_usage_args)
-    
+
     # ChatGPT
     keyTxt.change(submit_key, keyTxt, [user_api_key, status_display]).then(**get_usage_args)
 

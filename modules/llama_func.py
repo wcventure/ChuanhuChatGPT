@@ -17,9 +17,11 @@ from modules.presets import *
 from modules.utils import *
 
 def get_index_name(file_src):
-    index_name = ""
+    index_name = []
     for file in file_src:
-        index_name += os.path.basename(file.name)
+        index_name.append(os.path.basename(file.name))
+    index_name = sorted(index_name)
+    index_name = "".join(index_name)
     index_name = sha1sum(index_name)
     return index_name
 
@@ -82,12 +84,12 @@ def construct_index(
         separator=separator,
     )
     index_name = get_index_name(file_src)
-    documents = get_documents(file_src)
     if os.path.exists(f"./index/{index_name}.json"):
         logging.info("找到了缓存的索引文件，加载中……")
         return GPTSimpleVectorIndex.load_from_disk(f"./index/{index_name}.json")
     else:
         try:
+            documents = get_documents(file_src)
             logging.debug("构建索引中……")
             index = GPTSimpleVectorIndex(
                 documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper
