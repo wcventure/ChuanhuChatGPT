@@ -19,6 +19,8 @@ from modules.llama_func import *
 from modules.utils import *
 import modules.shared as shared
 
+from modules.wcventure import *
+
 # logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s")
 
 if TYPE_CHECKING:
@@ -43,6 +45,9 @@ def get_response(
 
     history = [construct_system(system_prompt), *history]
 
+    if selected_model == "concurrency-test":
+        selected_model, history, temperature= concurrency_test_gpt(history[-2], history[-1])
+    
     payload = {
         "model": selected_model,
         "messages": history,  # [{"role": "user", "content": f"{inputs}"}],

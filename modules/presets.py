@@ -49,6 +49,7 @@ summarize_prompt = "你是谁？我们刚才聊了什么？"  # 总结对话时�
 MODELS = [
     "gpt-3.5-turbo",
     "gpt-3.5-turbo-0301",
+    "concurrency-test",
     "gpt-4",
     "gpt-4-0314",
     "gpt-4-32k",
