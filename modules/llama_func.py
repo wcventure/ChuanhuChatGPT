@@ -13,54 +13,57 @@ from llama_index import (
 from langchain.llms import OpenAI
 import colorama
 
-
 from modules.presets import *
 from modules.utils import *
 
+def get_index_name(file_src):
+    index_name = ""
+    for file in file_src:
+        index_name += os.path.basename(file.name)
+    index_name = sha1sum(index_name)
+    return index_name
 
 def get_documents(file_src):
     documents = []
-    index_name = ""
     logging.debug("Loading documents...")
     logging.debug(f"file_src: {file_src}")
     for file in file_src:
-        logging.debug(f"file: {file.name}")
-        index_name += file.name
+        logging.info(f"loading file: {file.name}")
         if os.path.splitext(file.name)[1] == ".pdf":
             logging.debug("Loading PDF...")
             CJKPDFReader = download_loader("CJKPDFReader")
             loader = CJKPDFReader()
-            documents += loader.load_data(file=file.name)
+            text_raw = loader.load_data(file=file.name)[0].text
         elif os.path.splitext(file.name)[1] == ".docx":
             logging.debug("Loading DOCX...")
             DocxReader = download_loader("DocxReader")
             loader = DocxReader()
-            documents += loader.load_data(file=file.name)
+            text_raw = loader.load_data(file=file.name)[0].text
         elif os.path.splitext(file.name)[1] == ".epub":
             logging.debug("Loading EPUB...")
             EpubReader = download_loader("EpubReader")
             loader = EpubReader()
-            documents += loader.load_data(file=file.name)
+            text_raw = loader.load_data(file=file.name)[0].text
         else:
             logging.debug("Loading text file...")
             with open(file.name, "r", encoding="utf-8") as f:
-                text = add_space(f.read())
-                documents += [Document(text)]
-    index_name = sha1sum(index_name)
-    return documents, index_name
+                text_raw = f.read()
+        text = add_space(text_raw)
+        documents += [Document(text)]
+    return documents
 
 
 def construct_index(
-    api_key,
-    file_src,
-    max_input_size=4096,
-    num_outputs=1,
-    max_chunk_overlap=20,
-    chunk_size_limit=600,
-    embedding_limit=None,
-    separator=" ",
-    num_children=10,
-    max_keywords_per_chunk=10,
+        api_key,
+        file_src,
+        max_input_size=4096,
+        num_outputs=1,
+        max_chunk_overlap=20,
+        chunk_size_limit=600,
+        embedding_limit=None,
+        separator=" ",
+        num_children=10,
+        max_keywords_per_chunk=10,
 ):
     os.environ["OPENAI_API_KEY"] = api_key
     chunk_size_limit = None if chunk_size_limit == 0 else chunk_size_limit
@@ -78,7 +81,8 @@ def construct_index(
         chunk_size_limit,
         separator=separator,
     )
-    documents, index_name = get_documents(file_src)
+    index_name = get_index_name(file_src)
+    documents = get_documents(file_src)
     if os.path.exists(f"./index/{index_name}.json"):
         logging.info("找到了缓存的索引文件，加载中……")
         return GPTSimpleVectorIndex.load_from_disk(f"./index/{index_name}.json")
@@ -97,12 +101,12 @@ def construct_index(
 
 
 def chat_ai(
-    api_key,
-    index,
-    question,
-    context,
-    chatbot,
-    reply_language,
+        api_key,
+        index,
+        question,
+        context,
+        chatbot,
+        reply_language,
 ):
     os.environ["OPENAI_API_KEY"] = api_key
 
@@ -133,15 +137,15 @@ def chat_ai(
 
 
 def ask_ai(
-    api_key,
-    index,
-    question,
-    prompt_tmpl,
-    refine_tmpl,
-    sim_k=1,
-    temprature=0,
-    prefix_messages=[],
-    reply_language="中文",
+        api_key,
+        index,
+        question,
+        prompt_tmpl,
+        refine_tmpl,
+        sim_k=1,
+        temprature=0,
+        prefix_messages=[],
+        reply_language="中文",
 ):
     os.environ["OPENAI_API_KEY"] = api_key
 
@@ -174,7 +178,7 @@ def ask_ai(
         for index, node in enumerate(response.source_nodes):
             brief = node.source_text[:25].replace("\n", "")
             nodes.append(
-                f"<details><summary>[{index+1}]\t{brief}...</summary><p>{node.source_text}</p></details>"
+                f"<details><summary>[{index + 1}]\t{brief}...</summary><p>{node.source_text}</p></details>"
             )
         new_response = ret_text + "\n----------\n" + "\n\n".join(nodes)
         logging.info(
