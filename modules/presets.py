@@ -29,7 +29,7 @@ CONCURRENT_COUNT = 100 # 允许同时使用的用户数量
 SIM_K = 5
 INDEX_QUERY_TEMPRATURE = 1.0
 
-title = """<h1 align="left" style="min-width:200px; margin-top:0;">智能化可信软件工程实验室ChatGPT 🚀</h1>"""
+title = """<h1 align="left" style="min-width:200px; margin-top:0;">西电广研院智能化可信软件工程实验室ChatGPT 🚀</h1>"""
 description = ""
 '''
 description = """\
