@@ -5,6 +5,7 @@ import gradio as gr
 initial_prompt = "You are a helpful assistant."
 API_URL = "https://api.openai.com/v1/chat/completions"
 BALANCE_API_URL="https://api.openai.com/dashboard/billing/credit_grants"
+USAGE_API_URL="https://api.openai.com/dashboard/billing/usage"
 HISTORY_DIR = "history"
 TEMPLATES_DIR = "templates"
 
@@ -43,6 +44,10 @@ description = """\
 </div>
 """
 '''
+
+footer = """\
+<div class="versions">{versions}</div>
+"""
 
 summarize_prompt = "你是谁？我们刚才聊了什么？"  # 总结对话时的 prompt
 
