@@ -19,7 +19,7 @@ from modules.llama_func import *
 from modules.utils import *
 import modules.shared as shared
 
-from modules.wcventure import *
+from wcventure.concurrency_test import *
 
 # logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s")
 
@@ -94,7 +94,6 @@ def stream_predict(
     fake_input=None,
     display_append=""
 ):
-    global concurrency_test_cout
     def get_return_value():
         return chatbot, history, status_text, all_token_counts
 
@@ -182,14 +181,7 @@ def stream_predict(
                     yield get_return_value()
                     break
                 history[-1] = construct_assistant(partial_words)
-                if selected_model == "concurrency-test":
-                    if concurrency_test_cout == 0:
-                        chatbot[-1] = (chatbot[-1][0], "")
-                        chatbot.append(("", ""))
-                        concurrency_test_cout = 1
-                    chatbot[-1] = (partial_words+display_append, "")
-                else:
-                    chatbot[-1] = (chatbot[-1][0], partial_words+display_append)
+                chatbot[-1] = (chatbot[-1][0], partial_words+display_append)
                 all_token_counts[-1] += 1
                 yield get_return_value()
 

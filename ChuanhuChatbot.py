@@ -10,6 +10,7 @@ from modules.presets import *
 from modules.overwrites import *
 from modules.chat_func import *
 from modules.openai_func import get_usage
+from modules.toolbox import find_free_port
 
 os.environ["http_proxy"] = "http://192.168.88.110:4780"
 os.environ["https_proxy"] = "http://192.168.88.110:4780"
@@ -347,6 +348,20 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
     keyTxt.change(submit_key, keyTxt, [user_api_key, status_display]).then(**get_usage_args)
     keyTxt.submit(**get_usage_args)
 
+    # Model
+    def change_process_style_due_to_model(model):
+        if model == "concurrency-test":
+            gr.Chatbot.postprocess = postprocess_for_code
+            logging.info("chage gr.Chatbot.postprocess to postprocess_for_code")
+        else:
+            gr.Chatbot.postprocess = postprocess
+    model_select_dropdown.change(
+        change_process_style_due_to_model,
+        [model_select_dropdown],
+        [status_display],
+        show_progress=True,
+    )
+
     # Template
     templateRefreshBtn.click(get_template_names, None, [templateFileSelectDropdown])
     templateFileSelectDropdown.change(
@@ -406,9 +421,10 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
         show_progress=True,
     )
 
+_PORT_ = find_free_port()
 logging.info(
     colorama.Back.GREEN
-    + "\n温馨提示：访问 http://localhost:7860 查看界面"
+    + "\n温馨提示：访问 http://localhost:" + str(_PORT_) + "查看界面"
     + colorama.Style.RESET_ALL
 )
 # 默认开启本地服务器，默认可以直接从IP访问，默认不创建公开分享链接
@@ -447,7 +463,8 @@ if __name__ == "__main__":
                 share=False, favicon_path="./assets/favicon.ico", inbrowser=True
             )  # 改为 share=True 可以创建公开分享链接
         '''
-        demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=7860, share=False) # 可自定义端口
-        # demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=7860, share=False) # 可自定义端口
-        # demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=7860,auth=("在这里填写用户名", "在这里填写密码")) # 可设置用户名与密码
+        
+        demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=_PORT_, share=False) # 可自定义端口
+        # demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=_PORT_, share=False) # 可自定义端口
+        # demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=_PORT_,auth=("在这里填写用户名", "在这里填写密码")) # 可设置用户名与密码
         # demo.queue(concurrency_count=CONCURRENT_COUNT).launch(auth=("在这里填写用户名", "在这里填写密码")) # 适合Nginx反向代理

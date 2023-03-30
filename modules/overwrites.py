@@ -19,6 +19,20 @@ def compact_text_chunks(self, prompt: Prompt, text_chunks: List[str]) -> List[st
     return text_splitter.split_text(combined_str)
 
 
+def postprocess_for_code(
+    self, y: List[Tuple[str | None, str | None]]
+) -> List[Tuple[str | None, str | None]]:
+    if y is None or y == []:
+        return []
+    user, bot = y[-1]
+    if not detect_converted_mark(user):
+        user = convert_asis_user(user)
+    if not detect_converted_mark(bot):
+        bot = convert_code_bot(bot)
+    y[-1] = (user, bot)
+    return y
+
+
 def postprocess(
     self, y: List[Tuple[str | None, str | None]]
 ) -> List[Tuple[str | None, str | None]]:

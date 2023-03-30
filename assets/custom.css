@@ -139,11 +139,11 @@ ol:not(.options), ul:not(.options) {
     min-width: calc(var(--text-md)*var(--line-md) + 2*var(--spacing-xl));
 }
 [data-testid = "bot"] {
-    max-width: 85%;
+    max-width: 90%;
     border-bottom-left-radius: 0 !important;
 }
 [data-testid = "user"] {
-    max-width: 85%;
+    max-width: 90%;
     width: auto !important;
     border-bottom-right-radius: 0 !important;
 }

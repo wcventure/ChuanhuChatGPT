@@ -1,8 +1,6 @@
 # -*- coding:utf-8 -*-
 from modules.utils import *
 
-concurrency_test_cout = 0
-
 concurrency_test_prompt = [
             {"role": "system", "content": "You are a developer, and you want to test several functions running concurrenctly. I will give you a list of function and a code snippet. Based on the code snippet, you need to generate a concurrency test case that use pthread_create function to create multiple thread for it. You only need to generate the C/C++ code, and don't need to generate other things.\n Task 1: include the header file.\n Task 2: define and initialize the variable for each function I gave you.\nthread\n Task 3: using pthread_create to create a thread for each function I gave to you, and put correct initialized variable as the last arguement of the pthread_create.\n Task 4: using pthread_join to wait for the thread to finish.\n Task 5: print the result.\n Task 6: free the memory.\n Task 7: return the result.\n Task 8: end the program.\n "},
             {"role": "user", "content": "###Function: <<<t1, t2>>>\n\n###Code: <<<\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <string.h>\n\nchar* ptr1;\nchar* ptr2;\n\nvoid *t1(void*)\n{\n    if(buf[6] < \'m\')\n        ret = 1;\n    if(buf[5] == \'e\') {\n        ptr2 = ptr1;\n        printf(\"alias: ptr2 == ptr1\\n\");\n    }\n    if(buf[3] == \'s\')\n        if(buf[1] == \'u\'){\n            free(ptr1);\n\t    printf(\"free, %p\\n\", ptr1);\n        }\n    return NULL;\n}\n\nvoid *t2(void*)\n{\n    if(buf[4] == \'e\')\n        if(buf[2] == \'r\')\n if(buf[0] == \'f\'){\n                ptr2[0] = \'m\';\n                printf(\"use, %p\\n\", ptr2);\n   }\n    return NULL;\n}\n>>>"},
@@ -14,7 +12,5 @@ concurrency_test_prompt = [
         ]
 
 def concurrency_test_gpt(user_message, assistant_message):
-    global concurrency_test_cout
-    concurrency_test_cout = 0
     history = [*concurrency_test_prompt, user_message, assistant_message]
     return "gpt-3.5-turbo", history, 0

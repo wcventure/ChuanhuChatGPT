@@ -91,6 +91,23 @@ def normalize_markdown(md_text: str) -> str:
     return "\n".join(normalized_lines)
 
 
+def convert_asis_user(userinput):
+    userinput = userinput.replace('<','&lt;').replace('>','&gt;')
+    userinput = userinput.replace('&lt;&lt;&lt;','<code>').replace('&gt;&gt;&gt;','</code>')
+    userinput = userinput.replace('###Function', '<b>Function</b>').replace('###Code','<b>Code</b>')
+    return (
+        f"""<pre>{userinput}</pre>"""
+        + ALREADY_CONVERTED_MARK
+    )
+
+
+def convert_code_bot(my_code):
+    return (
+        f"""<pre><code class="language-c">{html.escape(my_code)}</code></pre>"""
+        + ALREADY_CONVERTED_MARK
+    )
+
+
 def convert_mdtext(md_text):
     code_block_pattern = re.compile(r"```(.*?)(?:```|$)", re.DOTALL)
     inline_code_pattern = re.compile(r"`(.*?)`", re.DOTALL)
