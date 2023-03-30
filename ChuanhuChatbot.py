@@ -31,8 +31,9 @@ else:
 authflag = False
 auth_list = []
 
-if dockerflag:
+if not my_api_key:
     my_api_key = os.environ.get("my_api_key")
+if dockerflag:
     if my_api_key == "empty":
         logging.error("Please give a api key!")
         sys.exit(1)
@@ -335,7 +336,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
             token_count,
             top_p,
             temperature,
-            gr.State(max_token_streaming//2 if use_streaming_checkbox.value else max_token_all//2),
+            gr.State(sum(token_count.value[-4:])),
             model_select_dropdown,
             language_select_dropdown,
         ],
