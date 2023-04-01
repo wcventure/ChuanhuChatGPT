@@ -13,9 +13,7 @@ import colorama
 from duckduckgo_search import ddg
 import asyncio
 import aiohttp
-from llama_index.indices.query.vector_store import GPTVectorStoreIndexQuery
-from llama_index.indices.query.schema import QueryBundle
-from langchain.llms import OpenAIChat
+
 
 from modules.presets import *
 from modules.llama_func import *
@@ -68,13 +66,13 @@ def get_response(
         timeout = timeout_all
 
 
-    # 如果有自定义的api-url，使用自定义url发送请求，否则使用默认设置发送请求
-    if shared.state.api_url != API_URL:
-        logging.info(f"使用自定义API URL: {shared.state.api_url}")
+    # 如果有自定义的api-host，使用自定义host发送请求，否则使用默认设置发送请求
+    if shared.state.completion_url != COMPLETION_URL:
+        logging.info(f"使用自定义API URL: {shared.state.completion_url}")
 
     with retrieve_proxy():
         response = requests.post(
-            shared.state.api_url,
+            shared.state.completion_url,
             headers=headers,
             json=payload,
             stream=True,
@@ -275,6 +273,11 @@ def predict(
     reply_language="中文",
     should_check_token_count=True,
 ):  # repetition_penalty, top_k
+    from llama_index.indices.query.vector_store import GPTVectorStoreIndexQuery
+    from llama_index.indices.query.schema import QueryBundle
+    from langchain.llms import OpenAIChat
+
+    
     logging.info("输入为：" + colorama.Fore.BLUE + f"{inputs}" + colorama.Style.RESET_ALL)
     if should_check_token_count:
         yield chatbot+[(inputs, "")], history, "开始生成回答……", all_token_counts
@@ -293,12 +296,14 @@ def predict(
         msg = "索引构建完成，获取回答中……"
         logging.info(msg)
         yield chatbot+[(inputs, "")], history, msg, all_token_counts
-        llm_predictor = LLMPredictor(llm=OpenAIChat(temperature=0, model_name=selected_model))
-        prompt_helper = PromptHelper(max_input_size = 4096, num_output = 5, max_chunk_overlap = 20, chunk_size_limit=600)
-        service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor, prompt_helper=prompt_helper)
-        query_object = GPTVectorStoreIndexQuery(index.index_struct, service_context=service_context, similarity_top_k=5, vector_store=index._vector_store, docstore=index._docstore)
-        query_bundle = QueryBundle(inputs)
-        nodes = query_object.retrieve(query_bundle)
+        with retrieve_proxy():
+            llm_predictor = LLMPredictor(llm=OpenAIChat(temperature=0, model_name=selected_model))
+            prompt_helper = PromptHelper(max_input_size = 4096, num_output = 5, max_chunk_overlap = 20, chunk_size_limit=600)
+            from llama_index import ServiceContext
+            service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor, prompt_helper=prompt_helper)
+            query_object = GPTVectorStoreIndexQuery(index.index_struct, service_context=service_context, similarity_top_k=5, vector_store=index._vector_store, docstore=index._docstore)
+            query_bundle = QueryBundle(inputs)
+            nodes = query_object.retrieve(query_bundle)
         reference_results = [n.node.text for n in nodes]
         reference_results = add_source_numbers(reference_results, use_source=False)
         display_reference = add_details(reference_results)

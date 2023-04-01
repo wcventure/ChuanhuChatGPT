@@ -82,6 +82,10 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         value=REPLY_LANGUAGES[0],
                     )
                     index_files = gr.Files(label="上传索引文件", type="file", multiple=True)
+                    two_column = gr.Checkbox(label="双栏pdf", value=advance_docs["pdf"].get("two_column", False))
+                    # TODO: 公式ocr
+                    # formula_ocr = gr.Checkbox(label="识别公式", value=advance_docs["pdf"].get("formula_ocr", False))
+                    updateDocConfigBtn = gr.Button("更新解析文件参数")
 
                 with gr.Tab(label="Prompt"):
                     systemPromptTxt = gr.Textbox(
@@ -168,12 +172,12 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         )
 
                     with gr.Accordion("网络设置", open=False):
-                        apiurlTxt = gr.Textbox(
+                        apihostTxt = gr.Textbox(
                             show_label=True,
-                            placeholder=f"在这里输入API地址...",
-                            label="API地址",
-                            value="https://api.openai.com/v1/chat/completions",
-                            lines=2,
+                            placeholder=f"在这里输入API-Host...",
+                            label="API-Host",
+                            value="api.openai.com",
+                            lines=1,
                         )
                         changeAPIURLBtn = gr.Button("🔄 切换API地址")
                         proxyTxt = gr.Textbox(
@@ -299,6 +303,8 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
     )
     reduceTokenBtn.click(**get_usage_args)
 
+    updateDocConfigBtn.click(update_doc_config, [two_column], None)
+
     # ChatGPT
     keyTxt.change(submit_key, keyTxt, [user_api_key, status_display]).then(**get_usage_args)
     keyTxt.submit(**get_usage_args)
@@ -361,11 +367,11 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
 
     # Advanced
     default_btn.click(
-        reset_default, [], [apiurlTxt, proxyTxt, status_display], show_progress=True
+        reset_default, [], [apihostTxt, proxyTxt, status_display], show_progress=True
     )
     changeAPIURLBtn.click(
-        change_api_url,
-        [apiurlTxt],
+        change_api_host,
+        [apihostTxt],
         [status_display],
         show_progress=True,
     )
