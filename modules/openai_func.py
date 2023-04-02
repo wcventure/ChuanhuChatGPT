@@ -1,6 +1,6 @@
 import requests
 import logging
-from modules.presets import (
+from .presets import (
     timeout_all,
     USAGE_API_URL,
     BALANCE_API_URL,
@@ -11,7 +11,7 @@ from modules.presets import (
 )
 
 from . import shared
-from modules.config import retrieve_proxy
+from .config import retrieve_proxy
 import os, datetime
 
 def get_billing_data(openai_api_key, billing_url):

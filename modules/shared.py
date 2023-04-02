@@ -1,4 +1,4 @@
-from modules.presets import COMPLETION_URL, BALANCE_API_URL, USAGE_API_URL, API_HOST
+from .presets import COMPLETION_URL, BALANCE_API_URL, USAGE_API_URL, API_HOST
 import os
 class State:
     interrupted = False

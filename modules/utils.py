@@ -22,9 +22,9 @@ from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
 
-from modules.presets import *
+from .presets import *
 from . import shared
-from modules.config import retrieve_proxy
+from .config import retrieve_proxy
 
 if TYPE_CHECKING:
     from typing import TypedDict

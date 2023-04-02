@@ -13,8 +13,8 @@ import colorama
 import PyPDF2
 from tqdm import tqdm
 
-from modules.presets import *
-from modules.utils import *
+from .presets import *
+from .utils import *
 
 def get_index_name(file_src):
     file_paths = [x.name for x in file_src]

@@ -5,13 +5,13 @@ import sys
 
 import gradio as gr
 
-from modules import config
-from modules.config import *
-from modules.utils import *
-from modules.presets import *
-from modules.overwrites import *
-from modules.chat_func import *
-from modules.openai_func import get_usage
+from .modules import config
+from .modules.config import *
+from .modules.utils import *
+from .modules.presets import *
+from .modules.overwrites import *
+from .modules.chat_func import *
+from .modules.openai_func import get_usage
 
 gr.Chatbot.postprocess = postprocess
 PromptHelper.compact_text_chunks = compact_text_chunks

@@ -5,8 +5,8 @@ from llama_index import Prompt
 from typing import List, Tuple
 import mdtex2html
 
-from modules.presets import *
-from modules.llama_func import *
+from .presets import *
+from .llama_func import *
 
 
 def compact_text_chunks(self, prompt: Prompt, text_chunks: List[str]) -> List[str]:

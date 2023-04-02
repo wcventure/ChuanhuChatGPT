@@ -15,12 +15,12 @@ import asyncio
 import aiohttp
 
 
-from modules.presets import *
-from modules.llama_func import *
-from modules.utils import *
+from .presets import *
+from .llama_func import *
+from .utils import *
 from . import shared
-from modules.config import retrieve_proxy
-
+from .config import retrieve_proxy
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from wcventure.concurrency_test import *
 
 # logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s")
