@@ -47,6 +47,10 @@ footer {
     transition: all 0.6s;
 }
 
+#academic_chatbot, #status_display {
+    transition: all 0.6s;
+}
+
 /* usage_display */
 #usage_display {
     position: relative;
@@ -96,6 +100,10 @@ ol:not(.options), ul:not(.options) {
 /* 亮色 */
 @media (prefers-color-scheme: light) {
     #chuanhu_chatbot {
+        background-color: var(--chatbot-color-light) !important;
+        color: #000000 !important;
+    }
+    #academic_chatbot {
         background-color: var(--chatbot-color-light) !important;
         color: #000000 !important;
     }
