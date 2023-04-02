@@ -8,7 +8,7 @@ API_HOST = "api.openai.com"
 COMPLETION_URL = "https://api.openai.com/v1/chat/completions"
 BALANCE_API_URL="https://api.openai.com/dashboard/billing/credit_grants"
 USAGE_API_URL="https://api.openai.com/dashboard/billing/usage"
-HISTORY_DIR = "HistoryLogging/ChuanhuHistory"
+HISTORY_DIR = Path("HistoryLogging/ChuanhuHistory")
 TEMPLATES_DIR = "ChuanhuChatGPT/templates"
 
 # 错误信息
