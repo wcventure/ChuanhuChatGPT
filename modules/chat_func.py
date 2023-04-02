@@ -18,7 +18,7 @@ import aiohttp
 from modules.presets import *
 from modules.llama_func import *
 from modules.utils import *
-import modules.shared as shared
+from . import shared
 from modules.config import retrieve_proxy
 
 from wcventure.concurrency_test import *
