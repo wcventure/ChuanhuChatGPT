@@ -90,7 +90,7 @@ def construct_index(
     from langchain.chat_models import ChatOpenAI
     from llama_index import GPTSimpleVectorIndex, ServiceContext
     
-    os.environ["OPENAI_API_KEY"] = api_key
+    # os.environ["OPENAI_API_KEY"] = api_key
     chunk_size_limit = None if chunk_size_limit == 0 else chunk_size_limit
     embedding_limit = None if embedding_limit == 0 else embedding_limit
     separator = " " if separator == "" else separator

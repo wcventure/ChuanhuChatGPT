@@ -34,8 +34,17 @@ def get_billing_data(openai_api_key, billing_url):
     else:
         raise Exception(f"API request failed with status code {response.status_code}: {response.text}")
     
-
+get_usage_count = 0
 def get_usage(openai_api_key):
+    global get_usage_count
+    # if get_usage_count reach max integer, reset to 0
+    if get_usage_count == 2147483647:
+        get_usage_count = 0
+    get_usage_count = get_usage_count + 1
+    # only get usage every 5 times the function is called
+    if not (get_usage_count-1) % 5 == 0:
+        return f"**该次对话不获取API使用情况**"
+    
     try:
         balance_data=get_billing_data(openai_api_key, shared.state.balance_api_url)
         logging.debug(balance_data)

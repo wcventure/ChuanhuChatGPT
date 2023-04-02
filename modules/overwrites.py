@@ -52,7 +52,8 @@ def postprocess(
     y[-1] = (user, bot)
     return y
 
-with open("./assets/custom.js", "r", encoding="utf-8") as f, open("./assets/Kelpy-Codos.js", "r", encoding="utf-8") as f2:
+cur_path = os.path.dirname(os.path.abspath(__file__))
+with open(cur_path + "/../assets/custom.js", "r", encoding="utf-8") as f, open(cur_path + "/../assets/Kelpy-Codos.js", "r", encoding="utf-8") as f2:
     customJS = f.read()
     kelpyCodos = f2.read()
 

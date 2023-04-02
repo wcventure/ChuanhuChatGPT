@@ -11,15 +11,12 @@ from modules.presets import *
 from modules.overwrites import *
 from modules.chat_func import *
 from modules.openai_func import get_usage
-from modules.toolbox import find_free_port
-
-os.environ["http_proxy"] = "http://192.168.88.110:4780"
-os.environ["https_proxy"] = "http://192.168.88.110:4780"
 
 gr.Chatbot.postprocess = postprocess
 PromptHelper.compact_text_chunks = compact_text_chunks
+current_path = os.path.dirname(__file__)
 
-with open("assets/custom.css", "r", encoding="utf-8") as f:
+with open(current_path + "/assets/custom.css", "r", encoding="utf-8") as f:
     customCSS = f.read()
 
 with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
@@ -32,7 +29,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
     topic = gr.State("未命名对话历史记录")
 
     with gr.Row():
-        gr.HTML(title)
+        gr.Markdown("### 交互式AI对话系统，创新引领智慧未来")
         status_display = gr.Markdown(get_geoip(), elem_id="status_display")
 
     with gr.Row().style(equal_height=True):
@@ -382,16 +379,20 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
         show_progress=True,
     )
 
+'''
 _PORT_ = find_free_port()
 logging.info(
     colorama.Back.GREEN
     + "\n温馨提示：访问 http://localhost:" + str(_PORT_) + "查看界面"
     + colorama.Style.RESET_ALL
 )
+'''
+
 # 默认开启本地服务器，默认可以直接从IP访问，默认不创建公开分享链接
 demo.title = "智能化可信软件工程实验室ChatGPT 🚀"
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
+def Chuanhu_main(_PORT_):
     reload_javascript()
     # if running in Docker
     if dockerflag:

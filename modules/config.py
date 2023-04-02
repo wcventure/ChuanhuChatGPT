@@ -18,8 +18,12 @@ __all__ = [
 
 # 添加一个统一的config文件，避免文件过多造成的疑惑（优先级最低）
 # 同时，也可以为后续支持自定义功能提供config的帮助
+cur_path = os.path.dirname(os.path.abspath(__file__))
 if os.path.exists("config.json"):
     with open("config.json", "r", encoding='utf-8') as f:
+        config = json.load(f)
+elif os.path.exists(cur_path + "/../../conf/config.json"):
+    with open(cur_path + "/../../conf/config.json", "r", encoding='utf-8') as f:
         config = json.load(f)
 else:
     config = {}
@@ -30,10 +34,10 @@ if os.environ.get("dockerrun") == "yes":
     dockerflag = True
 
 ## 处理 api-key 以及 允许的用户列表
-my_api_key = config.get("openai_api_key", "") # 在这里输入你的 API 密钥
+# my_api_key = config.get("openai_api_key", "") # 在这里输入你的 API 密钥
 authflag = "users" in config
 auth_list = config.get("users", []) # 实际上是使用者的列表
-my_api_key = os.environ.get("my_api_key", my_api_key)
+my_api_key = os.environ.get("OPENAI_API_KEY")
 if dockerflag:
     if my_api_key == "empty":
         logging.error("Please give a api key!")
