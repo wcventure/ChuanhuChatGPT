@@ -252,14 +252,20 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
         fn=get_usage, inputs=[user_api_key], outputs=[usageTxt], show_progress=False
     )
 
+    def set_postprocess():
+        gr.Chatbot.postprocess = postprocess
+
+    set_postprocess_args = dict(
+        fn=set_postprocess, inputs=[], outputs=[]
+    )
 
     # Chatbot
     cancelBtn.click(cancel_outputing, [], [])
 
-    user_input.submit(**transfer_input_args).then(**chatgpt_predict_args).then(**end_outputing_args)
+    user_input.submit(**transfer_input_args).then(**set_postprocess_args).then(**chatgpt_predict_args).then(**end_outputing_args)
     user_input.submit(**get_usage_args)
 
-    submitBtn.click(**transfer_input_args).then(**chatgpt_predict_args).then(**end_outputing_args)
+    submitBtn.click(**transfer_input_args).then(**set_postprocess_args).then(**chatgpt_predict_args).then(**end_outputing_args)
     submitBtn.click(**get_usage_args)
 
     emptyBtn.click(
