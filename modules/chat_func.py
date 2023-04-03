@@ -20,8 +20,8 @@ from .llama_func import *
 from .utils import *
 from . import shared
 from .config import retrieve_proxy
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from wcventure.concurrency_test import *
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from testgen.concurrency_test import *
 
 # logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s")
 
