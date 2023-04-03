@@ -406,9 +406,17 @@ def predict(
         yield chatbot, history, status_text, all_token_counts
 
     if stream:
-        max_token = MODEL_SOFT_TOKEN_LIMIT[selected_model]["streaming"]
+        # check MODEL_SOFT_TOKEN_LIMIT has a key for selected_model
+        if selected_model not in MODEL_SOFT_TOKEN_LIMIT:
+            max_token = 3500
+        else:
+            max_token = MODEL_SOFT_TOKEN_LIMIT[selected_model]["streaming"]
     else:
-        max_token = MODEL_SOFT_TOKEN_LIMIT[selected_model]["all"]
+        # check MODEL_SOFT_TOKEN_LIMIT has a key for selected_model
+        if selected_model not in MODEL_SOFT_TOKEN_LIMIT:
+            max_token = 3500
+        else:
+            max_token = MODEL_SOFT_TOKEN_LIMIT[selected_model]["all"]
 
     if sum(all_token_counts) > max_token and should_check_token_count:
         status_text = f"精简token中{all_token_counts}/{max_token}"

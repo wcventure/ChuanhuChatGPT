@@ -48,7 +48,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
     with gr.Row().style(equal_height=True):
         with gr.Column(scale=5):
             with gr.Row():
-                chatbot = gr.Chatbot(elem_id="chuanhu_chatbot").style(height="100%")
+                chatbot = gr.Chatbot(elem_id="chuanhu_chatbot", postprocess = postprocess).style(height="100%")
             with gr.Row():
                 with gr.Column(scale=12):
                     user_input = gr.Textbox(
@@ -328,11 +328,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
 
     # Model
     def change_process_style_due_to_model(model):
-        if model == "concurrency-test":
-            gr.Chatbot.postprocess = postprocess_for_code
-            logging.info("chage gr.Chatbot.postprocess to postprocess_for_code")
-        else:
-            gr.Chatbot.postprocess = postprocess
+        gr.Chatbot.postprocess = postprocess
     model_select_dropdown.change(
         change_process_style_due_to_model,
         [model_select_dropdown],
