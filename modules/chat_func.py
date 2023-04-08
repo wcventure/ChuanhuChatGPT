@@ -23,6 +23,7 @@ from .config import retrieve_proxy
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from testgen.concurrency_test import *
 from codegen.code_generation import *
+from specgen.spec_generation import *
 
 # logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s")
 
@@ -53,7 +54,9 @@ def get_response(
         selected_model, history, temperature= concurrency_test_gpt(history[-2], history[-1])
     elif selected_model == "code-generation":
         selected_model, history, temperature= code_generation_gpt(history)
-
+    elif selected_model == "specification-generation":
+        selected_model, history, temperature= spec_generation_gpt(history[-2], history[-1])
+    logging.info(f"history = {history}")
     payload = {
         "model": selected_model,
         "messages": history,  # [{"role": "user", "content": f"{inputs}"}],
