@@ -21,7 +21,7 @@ ssl_error_prompt = "SSL错误，无法获取对话。"  # SSL 错误
 no_apikey_msg = "API key长度不是51位，请检查是否输入正确。"  # API key 长度不足 51 位
 no_input_msg = "请输入对话内容。"  # 未输入对话内容
 
-timeout_streaming = 10  # 流式对话时的超时时间
+timeout_streaming = 60  # 流式对话时的超时时间
 timeout_all = 200  # 非流式对话时的超时时间
 enable_streaming_option = True  # 是否启用选择选择是否实时显示回答的勾选框
 HIDE_MY_KEY = False  # 如果你想在UI中隐藏你的 API 密钥，将此值设置为 True
@@ -47,6 +47,15 @@ description = """\
 
 footer = """<div class="versions">{versions}</div>"""
 
+appearance_switcher = """
+<div style="display: flex; justify-content: space-between;">
+<span style="margin-top: 4px !important;">切换亮暗色主题</span>
+<span><label class="apSwitch" for="checkbox">
+    <input type="checkbox" id="checkbox">
+    <div class="apSlider"></div>
+</label></span>
+</div>
+"""
 summarize_prompt = "你是谁？我们刚才聊了什么？"  # 总结对话时的 prompt
 
 MODELS = [
