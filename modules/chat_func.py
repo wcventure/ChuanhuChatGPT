@@ -56,7 +56,7 @@ def get_response(
         selected_model, history, temperature= code_generation_gpt(history)
     elif selected_model == "specification-generation":
         selected_model, history, temperature= spec_generation_gpt(history[-2], history[-1])
-    logging.info(f"history = {history}")
+    
     payload = {
         "model": selected_model,
         "messages": history,  # [{"role": "user", "content": f"{inputs}"}],
