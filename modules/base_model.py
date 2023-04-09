@@ -35,6 +35,12 @@ class ModelType(Enum):
         model_name_lower = model_name.lower()
         if "gpt" in model_name_lower:
             model_type = ModelType.OpenAI
+        elif "code-" in model_name_lower:
+            model_type = ModelType.OpenAI
+        elif "spec-" in model_name_lower or "specification-" in model_name_lower:
+            model_type = ModelType.OpenAI
+        elif "concurrency-" in model_name_lower:
+            model_type = ModelType.OpenAI
         elif "chatglm" in model_name_lower:
             model_type = ModelType.ChatGLM
         elif "llama" in model_name_lower or "alpaca" in model_name_lower:
@@ -81,6 +87,12 @@ class BaseLLMModel:
         self.frequency_penalty = frequency_penalty
         self.logit_bias = logit_bias
         self.user_identifier = user
+    
+    def set_model_name(self, model_name):
+        self.model_name = model_name
+        
+    def get_model_name(self):
+        return self.model_name
 
     def get_answer_stream_iter(self):
         """stream predict, need to be implemented
@@ -128,9 +140,9 @@ class BaseLLMModel:
         user_token_count = self.count_token(inputs)
         self.all_token_counts.append(user_token_count)
         logging.debug(f"输入token计数: {user_token_count}")
-
+        
         stream_iter = self.get_answer_stream_iter()
-
+        
         for partial_text in stream_iter:
             chatbot[-1] = (chatbot[-1][0], partial_text + display_append)
             self.all_token_counts[-1] += 1
@@ -183,7 +195,7 @@ class BaseLLMModel:
             LangchainEmbedding,
             OpenAIEmbedding,
         )
-
+        
         logging.info(
             "输入为：" + colorama.Fore.BLUE + f"{inputs}" + colorama.Style.RESET_ALL
         )
@@ -286,7 +298,7 @@ class BaseLLMModel:
             return
 
         self.history.append(construct_user(inputs))
-
+        
         try:
             if stream:
                 logging.debug("使用流式传输")
@@ -310,7 +322,7 @@ class BaseLLMModel:
         except Exception as e:
             status_text = STANDARD_ERROR_MSG + str(e)
             yield chatbot, status_text
-
+        
         if len(self.history) > 1 and self.history[-1]["content"] != inputs:
             logging.info(
                 "回答为："
@@ -324,7 +336,7 @@ class BaseLLMModel:
             self.all_token_counts = self.all_token_counts[-2:]
 
         max_token = self.token_upper_limit - TOKEN_OFFSET
-
+        
         if sum(self.all_token_counts) > max_token and should_check_token_count:
             count = 0
             while (
