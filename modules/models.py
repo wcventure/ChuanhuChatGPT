@@ -309,7 +309,8 @@ class LLaMA_Client(BaseLLMModel):
         if model_path is not None:
             model_source = model_path
         else:
-            raise Exception(f"models目录下没有这个模型: {model_name}")
+            model_source = f"decapoda-research/{model_name}"
+            # raise Exception(f"models目录下没有这个模型: {model_name}")
         if lora_path is not None:
             lora_path = f"lora/{lora_path}"
         self.max_generation_token = 1000
@@ -349,8 +350,14 @@ class LLaMA_Client(BaseLLMModel):
         self.end_string = "\n\n"
 
     def _get_llama_style_input(self):
-        history = [x["content"] for x in self.history]
-        context = "\n".join(history)
+        history = []
+        for x in self.history:
+            if x["role"] == "user":
+                history.append(f"Input: {x['content']}")
+            else:
+                history.append(f"Output: {x['content']}")
+        context = "\n\n".join(history)
+        context += "\n\nOutput: "
         return context
 
     def get_answer_at_once(self):
@@ -368,44 +375,32 @@ class LLaMA_Client(BaseLLMModel):
         )
 
         response = output_dataset.to_dict()["instances"][0]["text"]
-
-        try:
-            index = response.index(self.end_string)
-        except ValueError:
-            response += self.end_string
-            index = response.index(self.end_string)
-
-        response = response[: index + 1]
         return response, len(response)
 
     def get_answer_stream_iter(self):
         context = self._get_llama_style_input()
-
-        input_dataset = self.dataset.from_dict(
-            {"type": "text_only", "instances": [{"text": context}]}
-        )
-
-        output_dataset = self.inferencer.inference(
-            model=self.model,
-            dataset=input_dataset,
-            max_new_tokens=self.max_generation_token,
-            temperature=self.temperature,
-        )
-
-        response = output_dataset.to_dict()["instances"][0]["text"]
-
-        try:
-            index = response.index(self.end_string)
-        except ValueError:
-            response += self.end_string
-            index = response.index(self.end_string)
-
-        response = response[: index + 1]
-        yield response
+        partial_text = ""
+        step = 1
+        for _ in range(0, self.max_generation_token, step):
+            input_dataset = self.dataset.from_dict(
+                {"type": "text_only", "instances": [{"text": context+partial_text}]}
+            )
+            output_dataset = self.inferencer.inference(
+                model=self.model,
+                dataset=input_dataset,
+                max_new_tokens=step,
+                temperature=self.temperature,
+            )
+            response = output_dataset.to_dict()["instances"][0]["text"]
+            if response == "":
+                break
+            partial_text += response
+            yield partial_text
 
 
 class ModelManager:
     def __init__(self, **kwargs) -> None:
+        self.model = None
         self.get_model(**kwargs)
 
     def get_model(
@@ -424,9 +419,11 @@ class ModelManager:
         dont_change_lora_selector = False
         if model_type != ModelType.OpenAI:
             config.local_embedding = True
+        del self.model
         model = None
         try:
             if model_type == ModelType.OpenAI:
+                logging.info(f"正在加载OpenAI模型: {model_name}")
                 model = OpenAIClient(
                     model_name=model_name,
                     api_key=access_key,
@@ -435,15 +432,17 @@ class ModelManager:
                     top_p=top_p,
                 )
             elif model_type == ModelType.ChatGLM:
+                logging.info(f"正在加载ChatGLM模型: {model_name}")
                 model = ChatGLM_Client(model_name)
             elif model_type == ModelType.LLaMA and lora_model_path == "":
-                msg = "现在请选择LoRA模型"
+                msg = f"现在请为 {model_name} 选择LoRA模型"
                 logging.info(msg)
                 lora_selector_visibility = True
                 if os.path.isdir("lora"):
                     lora_choices = get_file_names("lora", plain=True, filetypes=[""])
                 lora_choices = ["No LoRA"] + lora_choices
             elif model_type == ModelType.LLaMA and lora_model_path != "":
+                logging.info(f"正在加载LLaMA模型: {model_name} + {lora_model_path}")
                 dont_change_lora_selector = True
                 if lora_model_path == "No LoRA":
                     lora_model_path = None
@@ -451,15 +450,13 @@ class ModelManager:
                 else:
                     msg += f" + {lora_model_path}"
                 model = LLaMA_Client(model_name, lora_model_path)
-                pass
             elif model_type == ModelType.Unknown:
                 raise ValueError(f"未知模型: {model_name}")
             logging.info(msg)
         except Exception as e:
             logging.error(e)
             msg = f"{STANDARD_ERROR_MSG}: {e}"
-        if model is not None:
-            self.model = model
+        self.model = model
         if dont_change_lora_selector:
             return msg
         else:

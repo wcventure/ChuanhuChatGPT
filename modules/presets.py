@@ -1,6 +1,8 @@
 # -*- coding:utf-8 -*-
-import gradio as gr
+import os
 from pathlib import Path
+
+import gradio as gr
 
 # ChatGPT 设置
 INITIAL_SYSTEM_PROMPT = "You are a helpful assistant."
@@ -41,7 +43,7 @@ description = """\
 
 由Bilibili [土川虎虎虎](https://space.bilibili.com/29125536) 和 [明昭MZhao](https://space.bilibili.com/24807452)开发
 
-访问川虎ChatGPT的 [GitHub项目](https://github.com/GaiZhenbiao/ChuanhuChatGPT) 下载最新版脚本
+访问川虎Chat的 [GitHub项目](https://github.com/GaiZhenbiao/ChuanhuChatGPT) 下载最新版脚本
 
 </div>
 """
@@ -80,6 +82,14 @@ MODELS = [
     "llama-30b-hf-int4",
     "llama-65b-hf",
 ]  # 可选的模型
+
+os.makedirs("models", exist_ok=True)
+os.makedirs("lora", exist_ok=True)
+os.makedirs("history", exist_ok=True)
+for dir_name in os.listdir("models"):
+    if os.path.isdir(os.path.join("models", dir_name)):
+        if dir_name not in MODELS:
+            MODELS.append(dir_name)
 
 DEFAULT_MODEL = 0  # 默认的模型在MODELS中的序号，从0开始数
 
