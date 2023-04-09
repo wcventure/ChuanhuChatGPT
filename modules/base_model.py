@@ -94,6 +94,10 @@ class BaseLLMModel:
     def get_model_name(self):
         return self.model_name
 
+    def set_sys_prompt(self, sys_prompt):
+        self.system_prompt = sys_prompt
+        print(f"sys_prompt设置为{sys_prompt}")
+
     def get_answer_stream_iter(self):
         """stream predict, need to be implemented
         conversations are stored in self.history, with the most recent question, in OpenAI format

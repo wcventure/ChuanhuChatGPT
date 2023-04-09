@@ -119,7 +119,7 @@ class OpenAIClient(BaseLLMModel):
             "Content-Type": "application/json",
             "Authorization": f"Bearer {openai_api_key}",
         }
-
+        logging.info(f"system_prompt = {system_prompt}")
         if system_prompt is not None:
             history = [construct_system(system_prompt), *history]
 
@@ -468,6 +468,9 @@ class ModelManager:
         
     def get_model_name(self):
         return self.model.get_model_name()
+    
+    def set_sys_prompt(self, sys_prompt):
+        return self.model.set_sys_prompt(sys_prompt)
     
     def predict(self, *args):
         iter = self.model.predict(*args)
