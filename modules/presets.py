@@ -33,15 +33,10 @@ CONCURRENT_COUNT = 100 # 允许同时使用的用户数量
 SIM_K = 5
 INDEX_QUERY_TEMPRATURE = 1.0
 
-<<<<<<< HEAD
 title = """<h1 align="left" style="min-width:200px; margin-top:6px; white-space: nowrap;">西电广研院智能化可信软件工程实验室ChatGPT 🚀</h1>"""
 description = ""
 '''
 description = """\
-=======
-CHUANHU_TITLE = """<h1 align="left">川虎ChatGPT 🚀</h1>"""
-CHUANHU_DESCRIPTION = """\
->>>>>>> upstream/main
 <div align="center" style="margin:16px 0">
 
 由Bilibili [土川虎虎虎](https://space.bilibili.com/29125536) 和 [明昭MZhao](https://space.bilibili.com/24807452)开发

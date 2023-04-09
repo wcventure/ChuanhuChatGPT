@@ -351,7 +351,7 @@ class BaseLLMModel:
         if len(self.history) == 0:
             yield chatbot, f"{STANDARD_ERROR_MSG}上下文是空的"
             return
-
+        logging.debug(f"history = {self.history}")
         inputs = self.history[-2]["content"]
         del self.history[-2:]
         self.all_token_counts.pop()

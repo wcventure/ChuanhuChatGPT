@@ -262,7 +262,6 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         changeProxyBtn = gr.Button("🔄 设置代理地址")
                         default_btn = gr.Button("🔙 恢复默认设置")
 
-    gr.Markdown(CHUANHU_DESCRIPTION)
     gr.HTML(FOOTER.format(versions=versions_html()), elem_id="footer")
     chatgpt_predict_args = dict(
         fn=current_model.value.predict,

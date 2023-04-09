@@ -22,9 +22,11 @@ from .llama_func import *
 from .utils import *
 from . import shared
 from .config import retrieve_proxy
-from modules import config
+from . import config
 from .base_model import BaseLLMModel, ModelType
-
+from testgen.concurrency_test import *
+from codegen.code_generation import *
+from specgen.spec_generation import *
 
 class OpenAIClient(BaseLLMModel):
     def __init__(
@@ -120,6 +122,13 @@ class OpenAIClient(BaseLLMModel):
 
         if system_prompt is not None:
             history = [construct_system(system_prompt), *history]
+
+        if self.model_name == "concurrency-test":
+            self.model_name, history, temperature= concurrency_test_gpt(history[-2], history[-1])
+        elif self.model_name == "code-generation":
+            self.model_name, history, temperature= code_generation_gpt(history)
+        elif self.model_name == "specification-generation":
+            self.model_name, history, temperature= spec_generation_gpt(history[-2], history[-1])
 
         payload = {
             "model": self.model_name,
