@@ -77,6 +77,7 @@ class BaseLLMModel:
         self.system_prompt = system_prompt
         self.api_key = None
         self.need_api_key = False
+        self.single_turn = False
 
         self.temperature = temperature
         self.top_p = top_p
@@ -219,7 +220,7 @@ class BaseLLMModel:
             index = construct_index(self.api_key, file_src=files)
             assert index is not None, "索引构建失败"
             msg = "索引构建完成，获取回答中……"
-            if local_embedding:
+            if local_embedding or self.model_type != ModelType.OpenAI:
                 embed_model = LangchainEmbedding(HuggingFaceEmbeddings())
             else:
                 embed_model = OpenAIEmbedding()
@@ -301,6 +302,9 @@ class BaseLLMModel:
             yield chatbot + [(inputs, "")], status_text
             return
 
+        if self.single_turn:
+            self.history = []
+            self.all_token_counts = []
         self.history.append(construct_user(inputs))
         
         try:
@@ -336,8 +340,10 @@ class BaseLLMModel:
             )
 
         if limited_context:
-            self.history = self.history[-4:]
-            self.all_token_counts = self.all_token_counts[-2:]
+            # self.history = self.history[-4:]
+            # self.all_token_counts = self.all_token_counts[-2:]
+            self.history = []
+            self.all_token_counts = []
 
         max_token = self.token_upper_limit - TOKEN_OFFSET
         
@@ -454,6 +460,9 @@ class BaseLLMModel:
         msg = f"API密钥更改为了{hide_middle_chars(self.api_key)}"
         logging.info(msg)
         return msg
+
+    def set_single_turn(self, new_single_turn):
+        self.single_turn = new_single_turn
 
     def reset(self):
         self.history = []
