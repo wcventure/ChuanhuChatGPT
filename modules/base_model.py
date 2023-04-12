@@ -77,6 +77,7 @@ class BaseLLMModel:
         self.system_prompt = system_prompt
         self.api_key = None
         self.need_api_key = False
+        self.single_turn = False
 
         self.temperature = temperature
         self.top_p = top_p
@@ -179,52 +180,35 @@ class BaseLLMModel:
         status_text = self.token_message()
         return chatbot, status_text
 
-    def predict(
-        self,
-        inputs,
-        chatbot,
-        stream=False,
-        use_websearch=False,
-        files=None,
-        reply_language="中文",
-        should_check_token_count=True,
-    ):  # repetition_penalty, top_k
-        from llama_index.indices.vector_store.base_query import GPTVectorStoreIndexQuery
-        from llama_index.indices.query.schema import QueryBundle
-        from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-        from langchain.chat_models import ChatOpenAI
-        from llama_index import (
-            GPTSimpleVectorIndex,
-            ServiceContext,
-            LangchainEmbedding,
-            OpenAIEmbedding,
-        )
-        
-        logging.info(
-            "输入为：" + colorama.Fore.BLUE + f"{inputs}" + colorama.Style.RESET_ALL
-        )
-        if should_check_token_count:
-            yield chatbot + [(inputs, "")], "开始生成回答……"
-        if reply_language == "跟随问题语言（不稳定）":
-            reply_language = "the same language as the question, such as English, 中文, 日本語, Español, Français, or Deutsch."
+    def prepare_inputs(self, inputs, use_websearch, files, reply_language):
         old_inputs = None
-        display_reference = []
+        display_append = []
         limited_context = False
         if files:
+            from llama_index.indices.vector_store.base_query import GPTVectorStoreIndexQuery
+            from llama_index.indices.query.schema import QueryBundle
+            from langchain.embeddings.huggingface import HuggingFaceEmbeddings
+            from langchain.chat_models import ChatOpenAI
+            from llama_index import (
+                GPTSimpleVectorIndex,
+                ServiceContext,
+                LangchainEmbedding,
+                OpenAIEmbedding,
+            )
             limited_context = True
             old_inputs = inputs
             msg = "加载索引中……（这可能需要几分钟）"
             logging.info(msg)
-            yield chatbot + [(inputs, "")], msg
+            # yield chatbot + [(inputs, "")], msg
             index = construct_index(self.api_key, file_src=files)
             assert index is not None, "索引构建失败"
-            msg = "索引构建完成，获取回答中……"
-            if local_embedding:
+            msg = "索引获取成功，生成回答中……"
+            logging.info(msg)
+            if local_embedding or self.model_type != ModelType.OpenAI:
                 embed_model = LangchainEmbedding(HuggingFaceEmbeddings())
             else:
                 embed_model = OpenAIEmbedding()
-            logging.info(msg)
-            yield chatbot + [(inputs, "")], msg
+            # yield chatbot + [(inputs, "")], msg
             with retrieve_proxy():
                 prompt_helper = PromptHelper(
                     max_input_size=4096,
@@ -248,8 +232,8 @@ class BaseLLMModel:
                 nodes = query_object.retrieve(query_bundle)
             reference_results = [n.node.text for n in nodes]
             reference_results = add_source_numbers(reference_results, use_source=False)
-            display_reference = add_details(reference_results)
-            display_reference = "\n\n" + "".join(display_reference)
+            display_append = add_details(reference_results)
+            display_append = "\n\n" + "".join(display_append)
             inputs = (
                 replace_today(PROMPT_TEMPLATE)
                 .replace("{query_str}", inputs)
@@ -265,11 +249,11 @@ class BaseLLMModel:
                 logging.debug(f"搜索结果{idx + 1}：{result}")
                 domain_name = urllib3.util.parse_url(result["href"]).host
                 reference_results.append([result["body"], result["href"]])
-                display_reference.append(
+                display_append.append(
                     f"{idx+1}. [{domain_name}]({result['href']})\n"
                 )
             reference_results = add_source_numbers(reference_results)
-            display_reference = "\n\n" + "".join(display_reference)
+            display_append = "\n\n" + "".join(display_append)
             inputs = (
                 replace_today(WEBSEARCH_PTOMPT_TEMPLATE)
                 .replace("{query}", inputs)
@@ -277,7 +261,30 @@ class BaseLLMModel:
                 .replace("{reply_language}", reply_language)
             )
         else:
-            display_reference = ""
+            display_append = ""
+        return limited_context, old_inputs, display_append, inputs
+
+    def predict(
+        self,
+        inputs,
+        chatbot,
+        stream=False,
+        use_websearch=False,
+        files=None,
+        reply_language="中文",
+        should_check_token_count=True,
+    ):  # repetition_penalty, top_k
+
+
+        logging.info(
+            "输入为：" + colorama.Fore.BLUE + f"{inputs}" + colorama.Style.RESET_ALL
+        )
+        if should_check_token_count:
+            yield chatbot + [(inputs, "")], "开始生成回答……"
+        if reply_language == "跟随问题语言（不稳定）":
+            reply_language = "the same language as the question, such as English, 中文, 日本語, Español, Français, or Deutsch."
+
+        limited_context, old_inputs, display_append, inputs = self.prepare_inputs(inputs=inputs, use_websearch=use_websearch, files=files, reply_language=reply_language)
 
         if (
             self.need_api_key and
@@ -301,6 +308,9 @@ class BaseLLMModel:
             yield chatbot + [(inputs, "")], status_text
             return
 
+        if self.single_turn:
+            self.history = []
+            self.all_token_counts = []
         self.history.append(construct_user(inputs))
         
         try:
@@ -310,7 +320,7 @@ class BaseLLMModel:
                     inputs,
                     chatbot,
                     fake_input=old_inputs,
-                    display_append=display_reference,
+                    display_append=display_append,
                 )
                 for chatbot, status_text in iter:
                     yield chatbot, status_text
@@ -320,7 +330,7 @@ class BaseLLMModel:
                     inputs,
                     chatbot,
                     fake_input=old_inputs,
-                    display_append=display_reference,
+                    display_append=display_append,
                 )
                 yield chatbot, status_text
         except Exception as e:
@@ -336,8 +346,10 @@ class BaseLLMModel:
             )
 
         if limited_context:
-            self.history = self.history[-4:]
-            self.all_token_counts = self.all_token_counts[-2:]
+            # self.history = self.history[-4:]
+            # self.all_token_counts = self.all_token_counts[-2:]
+            self.history = []
+            self.all_token_counts = []
 
         max_token = self.token_upper_limit - TOKEN_OFFSET
         
@@ -453,7 +465,10 @@ class BaseLLMModel:
         self.api_key = new_access_key.strip()
         msg = f"API密钥更改为了{hide_middle_chars(self.api_key)}"
         logging.info(msg)
-        return msg
+        return new_access_key, msg
+
+    def set_single_turn(self, new_single_turn):
+        self.single_turn = new_single_turn
 
     def reset(self):
         self.history = []
