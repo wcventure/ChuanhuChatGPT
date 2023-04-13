@@ -6,6 +6,7 @@ import sys
 import commentjson as json
 
 from . import shared
+from . import presets
 
 
 __all__ = [
@@ -85,17 +86,6 @@ api_host = os.environ.get("api_host", config.get("api_host", ""))
 if api_host:
     shared.state.set_api_host(api_host)
 
-if dockerflag:
-    if my_api_key == "empty":
-        logging.error("Please give a api key!")
-        sys.exit(1)
-    # auth
-    username = os.environ.get("USERNAME")
-    password = os.environ.get("PASSWORD")
-    if not (isinstance(username, type(None)) or isinstance(password, type(None))):
-        auth_list.append((os.environ.get("USERNAME"), os.environ.get("PASSWORD")))
-        authflag = True
-
 @contextmanager
 def retrieve_openai_api(api_key = None):
     old_api_key = os.environ.get("OPENAI_API_KEY", "")
@@ -170,5 +160,12 @@ if server_port is None:
         server_port = 7860
 
 assert server_port is None or type(server_port) == int, "要求port设置为int类型"
+
+# 设置默认model
+default_model = config.get("default_model", "")
+try:
+    presets.DEFAULT_MODEL = presets.MODELS.index(default_model)
+except ValueError:
+    pass
 
 share = config.get("share", False)
