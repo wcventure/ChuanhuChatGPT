@@ -167,7 +167,7 @@ class OpenAIClient(BaseLLMModel):
 
         #with retrieve_proxy():
         import time
-        for i in range(3):
+        for i in range(5):
             try:
                 response = requests.post(
                     shared.state.completion_url,
@@ -178,7 +178,7 @@ class OpenAIClient(BaseLLMModel):
                 )
                 break
             except:
-                tmp_sleep_time = 1 + i*0.5
+                tmp_sleep_time = 1.5 + i*0.5
                 logging.info(f"发生请求错误，{tmp_sleep_time}秒后重试")
                 time.sleep(tmp_sleep_time)
                 response = None
