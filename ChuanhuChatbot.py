@@ -57,7 +57,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                     user_input = gr.Textbox(
                         elem_id="user_input_tb",
                         show_label=False,
-                        placeholder=i18n(在这里输入，按Shift+Enter发送"),
+                        placeholder=i18n("在这里输入，按Shift+Enter发送"),
                         lines = 2
                     ).style(container=False)
                 with gr.Column(min_width=42, scale=1):
