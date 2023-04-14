@@ -165,7 +165,9 @@ class OpenAIClient(BaseLLMModel):
         if shared.state.completion_url != COMPLETION_URL:
             logging.info(f"使用自定义API URL: {shared.state.completion_url}")
 
-        with retrieve_proxy():
+        #with retrieve_proxy():
+        import time
+        for i in range(3):
             try:
                 response = requests.post(
                     shared.state.completion_url,
@@ -174,8 +176,12 @@ class OpenAIClient(BaseLLMModel):
                     stream=stream,
                     timeout=timeout,
                 )
+                break
             except:
-                return None
+                tmp_sleep_time = 1 + i*0.5
+                logging.info(f"发生请求错误，{tmp_sleep_time}秒后重试")
+                time.sleep(tmp_sleep_time)
+                response = None
         return response
 
     def _refresh_header(self):
