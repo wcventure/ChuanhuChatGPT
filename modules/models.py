@@ -118,22 +118,31 @@ class OpenAIClient(BaseLLMModel):
             "Content-Type": "application/json",
             "Authorization": f"Bearer {openai_api_key}",
         }
+
+        payload_model_name = self.model_name
+
         #logging.info(f"system_prompt = {system_prompt}")
         if system_prompt is not None:
             history = [construct_system(system_prompt), *history]
+
         #logging.info(f"history1 = {history}")
+        logging.info(f"self.model_name = {self.model_name}")
         if self.model_name == "concurrency-test":
-            self.model_name, history, self.temperature= concurrency_test_gpt(history)
+            history, self.temperature= concurrency_test_gpt(history)
+            payload_model_name = "gpt-3.5-turbo"
         elif self.model_name == "concurrency-fuzz-test":
-            self.model_name, history, self.temperature= concurrency_fuzz_test_gpt(history)
+            history, self.temperature= concurrency_fuzz_test_gpt(history)
+            payload_model_name = "gpt-3.5-turbo"
         elif self.model_name == "code-generation":
-            self.model_name, history, self.temperature= code_generation_gpt(history)
+            history, self.temperature= code_generation_gpt(history)
+            payload_model_name = "gpt-3.5-turbo"
         elif self.model_name == "specification-generation":
-            self.model_name, history, self.temperature= spec_generation_gpt(history)
+            history, self.temperature= spec_generation_gpt(history)
+            payload_model_name = "gpt-3.5-turbo"
         #logging.info(f"\n\nhistory2 = {history}")
         
         payload = {
-            "model": self.model_name,
+            "model": payload_model_name,
             "messages": history,
             "temperature": self.temperature,
             "top_p": self.top_p,
