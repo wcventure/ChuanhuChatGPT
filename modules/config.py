@@ -35,8 +35,9 @@ elif os.path.exists(cur_path + "/../../conf/config.json"):
         config = json.load(f)
 else:
     config = {}
-    
-language = config.get("language", "auto")
+
+lang_config = config.get("language", "auto")
+language = os.environ.get("default_ui_lang", lang_config)
 
 if os.path.exists("api_key.txt"):
     logging.info("检测到api_key.txt文件，正在进行迁移...")
@@ -70,6 +71,9 @@ if os.environ.get("dockerrun") == "yes":
 ## 处理 api-key 以及 允许的用户列表
 # my_api_key = config.get("openai_api_key", "") # 在这里输入你的 API 密钥
 my_api_key = os.environ.get("OPENAI_API_KEY")
+
+xmchat_api_key = config.get("xmchat_api_key", "")
+os.environ["XMCHAT_API_KEY"] = xmchat_api_key
 
 ## 多账户机制
 multi_api_key = config.get("multi_api_key", False) # 是否开启多账户机制

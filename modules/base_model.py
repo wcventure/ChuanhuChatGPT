@@ -29,7 +29,7 @@ class ModelType(Enum):
     OpenAI = 0
     ChatGLM = 1
     LLaMA = 2
-    XMBot = 3
+    XMChat = 3
 
     @classmethod
     def get_type(cls, model_name: str):
@@ -47,8 +47,8 @@ class ModelType(Enum):
             model_type = ModelType.ChatGLM
         elif "llama" in model_name_lower or "alpaca" in model_name_lower:
             model_type = ModelType.LLaMA
-        elif "xmbot" in model_name_lower:
-            model_type = ModelType.XMBot
+        elif "xmchat" in model_name_lower:
+            model_type = ModelType.XMChat
         else:
             model_type = ModelType.Unknown
         return model_type
@@ -217,7 +217,7 @@ class BaseLLMModel:
             msg = "索引获取成功，生成回答中……"
             logging.info(msg)
             if local_embedding or self.model_type != ModelType.OpenAI:
-                embed_model = LangchainEmbedding(HuggingFaceEmbeddings())
+                embed_model = LangchainEmbedding(HuggingFaceEmbeddings(model_name = "sentence-transformers/distiluse-base-multilingual-cased-v2"))
             else:
                 embed_model = OpenAIEmbedding()
             # yield chatbot + [(inputs, "")], msg
@@ -482,7 +482,7 @@ class BaseLLMModel:
         self.api_key = new_access_key.strip()
         msg = i18n("API密钥更改为了") + hide_middle_chars(self.api_key)
         logging.info(msg)
-        return new_access_key, msg
+        return self.api_key, msg
 
     def set_single_turn(self, new_single_turn):
         self.single_turn = new_single_turn
