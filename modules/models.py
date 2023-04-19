@@ -137,9 +137,15 @@ class OpenAIClient(BaseLLMModel):
             history, self.temperature= code_generation_gpt(history)
             payload_model_name = "gpt-3.5-turbo"
         elif self.model_name == "specification-generation":
-            history, self.temperature= spec_generation_gpt(history)
+            history, self.temperature= spec_generation_gpt_few_shot(history)
             payload_model_name = "gpt-3.5-turbo"
-        #logging.info(f"\n\nhistory2 = {history}")
+        elif self.model_name == "spec-generation-zero-shot":
+            history, self.temperature= spec_generation_gpt_zero_shot(history)
+            payload_model_name = "gpt-3.5-turbo"
+        elif self.model_name == "spec-generation-few-shot":
+            history, self.temperature= spec_generation_gpt_few_shot(history)
+            payload_model_name = "gpt-3.5-turbo"
+        logging.info(f"\n\nhistory2 = {history}")
         
         payload = {
             "model": payload_model_name,
