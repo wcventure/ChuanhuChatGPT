@@ -101,6 +101,8 @@ class OpenAIClient(BaseLLMModel):
             status_text = STANDARD_ERROR_MSG + READ_TIMEOUT_MSG + ERROR_RETRIEVE_MSG
             return status_text
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             logging.error(i18n("获取API使用情况失败:") + str(e))
             return STANDARD_ERROR_MSG + ERROR_RETRIEVE_MSG
 
@@ -239,6 +241,11 @@ class OpenAIClient(BaseLLMModel):
                         continue
         if error_msg:
             raise Exception(error_msg)
+
+    def set_key(self, new_access_key):
+        ret = super().set_key(new_access_key)
+        self._refresh_header()
+        return ret
 
 
 class ChatGLM_Client(BaseLLMModel):
@@ -428,9 +435,11 @@ class XMChat(BaseLLMModel):
         self.image_path = None
         self.xm_history = []
         self.url = "https://xmbot.net/web"
+        self.last_conv_id = None
 
     def reset(self):
         self.session_id = str(uuid.uuid4())
+        self.last_conv_id = None
         return [], "已重置"
 
     def image_to_base64(self, image_path):
@@ -477,6 +486,26 @@ class XMChat(BaseLLMModel):
             self.image_bytes = None
             self.image_path = None
 
+    def like(self):
+        if self.last_conv_id is None:
+            return "点赞失败，你还没发送过消息"
+        data = {
+            "uuid": self.last_conv_id,
+            "appraise": "good"
+        }
+        response = requests.post(self.url, json=data)
+        return "👍点赞成功，，感谢反馈～"
+
+    def dislike(self):
+        if self.last_conv_id is None:
+            return "点踩失败，你还没发送过消息"
+        data = {
+            "uuid": self.last_conv_id,
+            "appraise": "bad"
+        }
+        response = requests.post(self.url, json=data)
+        return "👎点踩成功，感谢反馈～"
+
     def prepare_inputs(self, real_inputs, use_websearch, files, reply_language, chatbot):
         fake_inputs = real_inputs
         display_append = ""
@@ -512,6 +541,7 @@ class XMChat(BaseLLMModel):
     def get_answer_at_once(self):
         question = self.history[-1]["content"]
         conv_id = str(uuid.uuid4())
+        self.last_conv_id = conv_id
         data = {
             "user_id": self.api_key,
             "session_id": self.session_id,

@@ -37,7 +37,7 @@ else:
     config = {}
 
 lang_config = config.get("language", "auto")
-language = os.environ.get("default_ui_lang", lang_config)
+language = os.environ.get("LANGUAGE", lang_config)
 
 if os.path.exists("api_key.txt"):
     logging.info("检测到api_key.txt文件，正在进行迁移...")
