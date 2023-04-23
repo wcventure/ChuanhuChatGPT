@@ -128,7 +128,7 @@ class OpenAIClient(BaseLLMModel):
             history = [construct_system(system_prompt), *history]
 
         #logging.info(f"history1 = {history}")
-        logging.info(f"self.model_name = {self.model_name}")
+        #logging.info(f"self.model_name = {self.model_name}")
         if self.model_name == "concurrency-test":
             history, self.temperature= concurrency_test_gpt(history)
             payload_model_name = "gpt-3.5-turbo"
@@ -147,7 +147,7 @@ class OpenAIClient(BaseLLMModel):
         elif self.model_name == "spec-generation-few-shot":
             history, self.temperature= spec_generation_gpt_few_shot(history)
             payload_model_name = "gpt-3.5-turbo"
-        logging.info(f"\n\nhistory2 = {history}")
+        #logging.info(f"\n\nhistory2 = {history}")
         
         payload = {
             "model": payload_model_name,
