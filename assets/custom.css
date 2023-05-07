@@ -230,8 +230,8 @@ ol:not(.options), ul:not(.options) {
     color: var(--chatbot-color-light) !important;
 }
 #academic_chatbot {
-    background-color: var(--chatbot-color-light) !important;
-    color: #000000 !important;
+    background-color: var(--chatbot-background-color-light) !important;
+    color: var(--chatbot-color-light) !important;
 }
 [data-testid = "bot"] {
     background-color: var(--message-bot-background-color-light) !important;
