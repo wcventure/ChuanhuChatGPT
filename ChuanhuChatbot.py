@@ -341,7 +341,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
     user_input.submit(**transfer_input_args).then(**set_postprocess_args).then(**chatgpt_predict_args).then(**end_outputing_args)
     user_input.submit(**get_usage_args)
 
-    submitBtn.click(**transfer_input_args)..then(**set_postprocess_args).then(**chatgpt_predict_args, api_name="predict").then(**end_outputing_args)
+    submitBtn.click(**transfer_input_args).then(**set_postprocess_args).then(**chatgpt_predict_args, api_name="predict").then(**end_outputing_args)
     submitBtn.click(**get_usage_args)
 
     index_files.change(handle_file_upload, [current_model, index_files, chatbot], [index_files, chatbot, status_display])
