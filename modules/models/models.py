@@ -28,9 +28,9 @@ from .. import shared
 from ..config import retrieve_proxy, usage_limit
 from .. import config # from modules import config
 from .base_model import BaseLLMModel, ModelType
-from testgen.concurrency_test import *
-from codegen.code_generation import *
-from specgen.spec_generation import *
+from utils.testgen.concurrency_test import *
+from utils.codegen.code_generation import *
+from utils.specgen.spec_generation import *
 
 class OpenAIClient(BaseLLMModel):
     def __init__(
