@@ -270,11 +270,14 @@ ol:not(.options), ul:not(.options) {
         max-height: calc(100vh - 140px - var(--line-sm)*1rem - 2*var(--block-label-margin) );
     }
     [data-testid = "bot"] {
-        max-width: 98% !important;
+        max-width: 95% !important;
     }
     #app_title h1{
         letter-spacing: -1px; font-size: 22px;
     }
+}
+#chuanhu_chatbot .wrap {
+    overflow-x: hidden;
 }
 /* 对话气泡 */
 .message {
@@ -296,7 +299,11 @@ ol:not(.options), ul:not(.options) {
     border-bottom-right-radius: 0 !important;
 }
 
-.message p { margin-bottom: 0.6rem !important;}
+.message p {
+    margin-top: 0.6em !important;
+    margin-bottom: 0.6em !important;
+}
+.message p:first-child { margin-top: 0 !important; }
 .message p:last-of-type { margin-bottom: 0 !important; }
 
 .message .md-message {
@@ -422,9 +429,12 @@ pre code {
     background-color: hsla(0, 0%, 0%, 80%)!important;
     border-radius: 10px;
     padding: 1.4em 1.2em 0em 1.4em;
-    margin: 0.6em 2em 1.2em 0.5em;
+    margin: 0.6em 2em 1em 0.2em;
     color: #FFF;
     box-shadow: 6px 6px 16px hsla(0, 0%, 0%, 0.2);
+}
+.message pre {
+    padding: 0 !important;
 }
 /* 代码高亮样式 */
 .highlight .hll { background-color: #49483e }
