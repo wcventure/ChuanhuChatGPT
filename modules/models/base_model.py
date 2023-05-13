@@ -33,6 +33,7 @@ class ModelType(Enum):
     XMChat = 3
     StableLM = 4
     MOSS = 5
+    YuanAI = 6
 
     @classmethod
     def get_type(cls, model_name: str):
@@ -56,6 +57,8 @@ class ModelType(Enum):
             model_type = ModelType.StableLM
         elif "moss" in model_name_lower:
             model_type = ModelType.MOSS
+        elif "yuanai" in model_name_lower:
+            model_type = ModelType.YuanAI
         else:
             model_type = ModelType.Unknown
         return model_type
