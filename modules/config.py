@@ -80,7 +80,7 @@ my_api_key = os.environ.get("OPENAI_API_KEY")
 xmchat_api_key = config.get("xmchat_api_key", "")
 os.environ["XMCHAT_API_KEY"] = xmchat_api_key
 
-render_latex = config.get("render_latex", False)
+render_latex = config.get("render_latex", True)
 
 if render_latex:
     os.environ["RENDER_LATEX"] = "yes"
