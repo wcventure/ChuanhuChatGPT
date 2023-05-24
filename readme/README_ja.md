@@ -44,13 +44,14 @@
   </p>
 </div>
 
-**APIを通じてアクセス可能な言語モデル**：
+## サポートされている大規模言語モデル
+**APIを通じてアクセス可能な大規模言語モデル**：
 - [ChatGPT](https://chat.openai.com) ([GPT-4](https://openai.com/product/gpt-4))
 - [Inspur Yuan 1.0](https://air.inspur.com/home)
 - [MiniMax](https://api.minimax.chat/)
 - [XMChat](https://github.com/MILVLG/xmchat)
 
-**ローカルに展開された言語モデル**：
+**ローカルに展開された大規模言語モデル**：
 - [ChatGLM](https://github.com/THUDM/ChatGLM-6B)
 - [LLaMA](https://github.com/facebookresearch/llama)
 - [StableLM](https://github.com/Stability-AI/StableLM)
