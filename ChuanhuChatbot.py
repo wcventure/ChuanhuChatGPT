@@ -15,7 +15,6 @@ from .modules.models.models import get_model
 
 gr.Chatbot._postprocess_chat_messages = postprocess_chat_messages
 gr.Chatbot.postprocess = postprocess
-PromptHelper.compact_text_chunks = compact_text_chunks
 current_path = os.path.dirname(os.path.abspath(__file__))
 
 with open(current_path + "/assets/custom.css", "r", encoding="utf-8") as f:
