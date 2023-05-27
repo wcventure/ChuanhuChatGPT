@@ -5,9 +5,9 @@ from typing import List, Tuple
 import mdtex2html
 from gradio_client import utils as client_utils
 
-from .presets import *
-from .llama_func import *
-from .config import render_latex
+from .modules.presets import *
+from .modules.llama_func import *
+from .modules.config import render_latex
 
 
 def postprocess_for_code(
