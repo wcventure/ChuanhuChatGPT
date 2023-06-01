@@ -493,6 +493,7 @@ def Chuanhu_main(_PORT_):
     reload_javascript()
     '''
     demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
+        blocked_paths=["config.json"],
         server_name=server_name,
         server_port=server_port,
         share=share,
