@@ -73,7 +73,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                     keyTxt = gr.Textbox(
                         show_label=True,
                         placeholder=f"Your API-key...",
-                        value=my_api_key, # hide_middle_chars(user_api_key.value),
+                        value=hide_middle_chars(user_api_key.value), #my_api_key, 
                         type="password",
                         visible=not HIDE_MY_KEY,
                         label="API-Key",
