@@ -178,7 +178,6 @@ def normalize_markdown(md_text: str) -> str: # deprecated
     return "\n".join(normalized_lines)
 
 
-<<<<<<< HEAD
 def convert_asis_user(userinput):
     userinput = userinput.replace('<','&lt;').replace('>','&gt;')
     userinput = userinput.replace('&lt;&lt;&lt;','<code>').replace('&gt;&gt;&gt;','</code>')
