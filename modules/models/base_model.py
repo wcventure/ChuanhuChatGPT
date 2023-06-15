@@ -391,7 +391,7 @@ class BaseLLMModel:
 
         status_text = "开始生成回答……"
         logging.info(
-            "输入为：" + colorama.Fore.BLUE + f"{inputs}" + colorama.Style.RESET_ALL
+             "用户" + f"{self.user_identifier}" + "的输入为：" + colorama.Fore.BLUE + f"{inputs}" + colorama.Style.RESET_ALL
         )
         if should_check_token_count:
             yield chatbot + [(inputs, "")], status_text
@@ -497,6 +497,7 @@ class BaseLLMModel:
         if len(self.history) > 0:
             inputs = self.history[-2]["content"]
             del self.history[-2:]
+        if len(self.all_token_counts) > 0:
             self.all_token_counts.pop()
         elif len(chatbot) > 0:
             inputs = chatbot[-1][0]
@@ -657,7 +658,7 @@ class BaseLLMModel:
                 history_file_path = os.path.join(HISTORY_DIR, user_name, filename)
             else:
                 history_file_path = filename
-            with open(history_file_path, "r") as f:
+            with open(history_file_path, "r", encoding="utf-8") as f:
                 json_s = json.load(f)
             try:
                 if type(json_s["history"][0]) == str:

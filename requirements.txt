@@ -1,6 +1,5 @@
-gradio==3.30.0
-gradio_client==0.2.4
-mdtex2html
+gradio==3.33.1
+gradio_client==0.2.5
 pypinyin
 tiktoken
 socksio
@@ -24,3 +23,5 @@ wikipedia
 google.generativeai
 openai
 unstructured
+google-api-python-client
+tabulate
