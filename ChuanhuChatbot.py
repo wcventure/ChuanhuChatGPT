@@ -476,14 +476,14 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
         show_progress=True,
     )
 
-
+'''
 _PORT_ = find_free_port()
 logging.info(
     colorama.Back.GREEN
     + "\n温馨提示：访问 http://localhost:" + str(_PORT_) + "查看界面"
     + colorama.Style.RESET_ALL
 )
-
+'''
 
 # 默认开启本地服务器，默认可以直接从IP访问，默认不创建公开分享链接
 demo.title = i18n("智能化可信软件工程实验室ChatGPT 🚀")
