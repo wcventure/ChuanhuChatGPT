@@ -47,6 +47,9 @@ def set_key(current_model, *args):
 def load_chat_history(current_model, *args):
     return current_model.load_chat_history(*args)
 
+def delete_chat_history(current_model, *args):
+    return current_model.delete_chat_history(*args)
+
 def interrupt(current_model, *args):
     return current_model.interrupt(*args)
 
@@ -231,7 +234,10 @@ def convert_bot_before_marked(chat_message):
         non_code_parts = code_block_pattern.split(chat_message)[::2]
         result = []
 
-        raw = f'<div class="raw-message hideM">{escape_markdown(chat_message)}</div>'
+        hr_pattern = r'\n\n<hr class="append-display no-in-raw" />(.*?)'
+        hr_match = re.search(hr_pattern, chat_message, re.DOTALL)
+        clip_hr = chat_message[:hr_match.start()] if hr_match else chat_message
+        raw = f'<div class="raw-message hideM">{escape_markdown(clip_hr)}</div>'
         for non_code, code in zip(non_code_parts, code_blocks + [""]):
             if non_code.strip():
                 result.append(non_code)
@@ -270,7 +276,8 @@ def escape_markdown(text):
         '`': '&#96;',
         '>': '&#62;',
         '<': '&#60;',
-        '|': '&#124;'
+        '|': '&#124;',
+        ':': '&#58;',
     }
     return ''.join(escape_chars.get(c, c) for c in text)
 
