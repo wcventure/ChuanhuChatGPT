@@ -476,7 +476,7 @@ thead th {
 /* 代码块 */
 .message pre,
 .message pre[class*=language-] {
-    color: #fff;
+    color: #000000;
     overflow-x: auto;
     overflow-y: hidden;
     margin: .8em 1em 1em 0em !important;
@@ -485,7 +485,7 @@ thead th {
 }
 .message pre code,
 .message pre code[class*=language-] {
-    color: #fff;
+    color: #000000;
     padding: 0;
     margin: 0;
     background-color: unset;
