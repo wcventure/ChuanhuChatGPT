@@ -89,9 +89,9 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                         label="API-Key",
                     )
                     if multi_api_key:
-                        usageTxt = gr.Markdown(i18n("多账号模式已开启，无需输入key，可直接开始对话"), elem_id="usage_display", elem_classes="insert_block")
+                        usageTxt = gr.Markdown(i18n("多账号模式已开启，无需输入key，可直接开始对话"), elem_id="usage_display", elem_classes="insert_block", visible=show_api_billing)
                     else:
-                        usageTxt = gr.Markdown(i18n("**发送消息** 或 **提交key** 以显示额度"), elem_id="usage_display", elem_classes="insert_block")
+                        usageTxt = gr.Markdown(i18n("**发送消息** 或 **提交key** 以显示额度"), elem_id="usage_display", elem_classes="insert_block", visible=show_api_billing)
                     model_select_dropdown = gr.Dropdown(
                         label=i18n("选择模型"), choices=MODELS, multiselect=False, value=MODELS[DEFAULT_MODEL], interactive=True
                     )
@@ -424,7 +424,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
     keyTxt.change(set_key, [current_model, keyTxt], [user_api_key, status_display], api_name="set_key").then(**get_usage_args)
     keyTxt.submit(**get_usage_args)
     single_turn_checkbox.change(set_single_turn, [current_model, single_turn_checkbox], None)
-    model_select_dropdown.change(get_model, [model_select_dropdown, lora_select_dropdown, user_api_key, temperature_slider, top_p_slider, systemPromptTxt, user_name], [current_model, status_display, chatbot, lora_select_dropdown], show_progress=True, api_name="get_model")
+    model_select_dropdown.change(get_model, [model_select_dropdown, lora_select_dropdown, user_api_key, temperature_slider, top_p_slider, systemPromptTxt, user_name], [current_model, status_display, chatbot, lora_select_dropdown, user_api_key, keyTxt], show_progress=True, api_name="get_model")
     model_select_dropdown.change(toggle_like_btn_visibility, [model_select_dropdown], [like_dislike_area], show_progress=False)
     lora_select_dropdown.change(get_model, [model_select_dropdown, lora_select_dropdown, user_api_key, temperature_slider, top_p_slider, systemPromptTxt, user_name], [current_model, status_display, chatbot], show_progress=True)
 
