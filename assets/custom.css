@@ -155,12 +155,13 @@ footer {
 #status_display {
     transition: all 0.6s;
 }
+
 #chuanhu_chatbot {
     transition: height 0.3s ease;
 }
 
-#academic_chatbot, #status_display {
-    transition: all 0.6s;
+#academic_chatbot {
+    transition: height 0.3s ease;
 }
 
 /* usage_display */
