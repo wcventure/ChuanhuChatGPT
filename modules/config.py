@@ -51,9 +51,6 @@ def load_config_to_environ(key_list):
             os.environ[key.upper()] = os.environ.get(key.upper(), config[key])
 
 
-sensitive_id = config.get("sensitive_id", "")
-sensitive_id = os.environ.get("SENSITIVE_ID", sensitive_id)
-
 lang_config = config.get("language", "auto")
 language = os.environ.get("LANGUAGE", lang_config)
 
@@ -96,6 +93,12 @@ if os.environ.get("dockerrun") == "yes":
 # my_api_key = config.get("openai_api_key", "") # 在这里输入你的 API 密钥
 my_api_key = os.environ.get("OPENAI_API_KEY")
 os.environ["OPENAI_EMBEDDING_API_KEY"] = my_api_key
+
+if config.get("legacy_api_usage", False):
+    sensitive_id = config.get("sensitive_id", "")
+    sensitive_id = os.environ.get("SENSITIVE_ID", sensitive_id)
+else:
+    sensitive_id = my_api_key
 
 google_palm_api_key = config.get("google_palm_api_key", "")
 google_palm_api_key = os.environ.get(
