@@ -260,7 +260,7 @@ def escape_markdown(text):
     Escape Markdown special characters to HTML-safe equivalents.
     """
     escape_chars = {
-        ' ': '&nbsp;',
+        # ' ': '&nbsp;',
         '_': '&#95;',
         '*': '&#42;',
         '[': '&#91;',
@@ -281,6 +281,7 @@ def escape_markdown(text):
         '$': '&#36;',
         ':': '&#58;',
     }
+    text = text.replace('    ', '&nbsp;&nbsp;&nbsp;&nbsp;')
     return ''.join(escape_chars.get(c, c) for c in text)
 
 
