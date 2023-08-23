@@ -20,10 +20,10 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 
 gr.Chatbot._postprocess_chat_messages = postprocess_chat_messages
 gr.Chatbot.postprocess = postprocess
-current_path = os.path.dirname(os.path.abspath(__file__))
 
-# with open("web_assets/css/ChuanhuChat.css", "r", encoding="utf-8") as f:
-#     ChuanhuChatCSS = f.read()
+#current_path = os.path.dirname(os.path.abspath(__file__))
+#with open("../web_assets/css/ChuanhuChat.css", "r", encoding="utf-8") as f:
+    #ChuanhuChatCSS = f.read()
 
 def create_new_model():
     return get_model(model_name = MODELS[DEFAULT_MODEL], access_key = my_api_key)[0]
@@ -44,6 +44,7 @@ with gr.Blocks(theme=small_and_beautiful_theme) as demo:
         status_display = gr.Markdown(get_geoip(), elem_id="status-display")
     with gr.Row(elem_id="float-display"):
         user_info = gr.Markdown(value="getting user info...", elem_id="user-info")
+        '''
         update_info = gr.HTML(get_html("update.html").format(
             current_version=repo_tag_html(),
             version_time=version_time(),
@@ -52,11 +53,11 @@ with gr.Blocks(theme=small_and_beautiful_theme) as demo:
             seenew_btn=i18n("详情"),
             ok_btn=i18n("好"),
             ), visible=check_update)
-
+        '''
     with gr.Row(equal_height=True):
         with gr.Column(scale=5):
             with gr.Row():
-                chatbot = gr.Chatbot(label="Chuanhu Chat", elem_id="chuanhu-chatbot", postprocess = postprocess, latex_delimiters=latex_delimiters_set, height=700)
+                chatbot = gr.Chatbot(label="Chuanhu Chat", elem_id="chuanhu-chatbot", latex_delimiters=latex_delimiters_set, height=700)
             with gr.Row():
                 with gr.Column(min_width=225, scale=12):
                     user_input = gr.Textbox(
@@ -534,9 +535,8 @@ logging.info(
 '''
 
 # 默认开启本地服务器，默认可以直接从IP访问，默认不创建公开分享链接
-demo.title = i18n("智能化可信软件工程实验室ChatGPT 🚀")
+demo.title = i18n("可信软件工程实验室ChatGPT 🚀")
 
-# if __name__ == "__main__":
 def Chuanhu_main(_PORT_):
     reload_javascript()
     '''

@@ -42,7 +42,7 @@ CONCURRENT_COUNT = 100 # 允许同时使用的用户数量
 SIM_K = 5
 INDEX_QUERY_TEMPRATURE = 1.0
 
-CHUANHU_TITLE = i18n("西电广研院>智能化可信软件工程实验室ChatGPT 🚀")
+CHUANHU_TITLE = i18n("可信软件工程实验室ChatGPT 🚀")
 CHUANHU_DESCRIPTION = ""
 
 
