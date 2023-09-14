@@ -5,14 +5,11 @@ import logging
 import commentjson as json
 import os
 import datetime
-from datetime import timezone
-import hashlib
 import csv
 import requests
 import re
 import html
-import sys
-import subprocess
+import hashlib
 
 import gradio as gr
 from pypinyin import lazy_pinyin
@@ -71,8 +68,11 @@ def delete_last_conversation(current_model, *args):
 def set_system_prompt(current_model, *args):
     return current_model.set_system_prompt(*args)
 
-def save_chat_history(current_model, *args):
-    return current_model.save_chat_history(*args)
+def rename_chat_history(current_model, *args):
+    return current_model.rename_chat_history(*args)
+
+def auto_name_chat_history(current_model, *args):
+    return current_model.auto_name_chat_history(*args)
 
 def export_markdown(current_model, *args):
     return current_model.export_markdown(*args)
@@ -129,9 +129,10 @@ def dislike(current_model, *args):
     return current_model.dislike(*args)
 
 
-def count_token(message):
+def count_token(input_str):
     encoding = tiktoken.get_encoding("cl100k_base")
-    input_str = f"role: {message['role']}, content: {message['content']}"
+    if type(input_str) == dict:
+        input_str = f"role: {input_str['role']}, content: {input_str['content']}"
     length = len(encoding.encode(input_str))
     return length
 
@@ -258,7 +259,7 @@ def convert_bot_before_marked(chat_message):
         code_block_pattern = re.compile(r"```(.*?)(?:```|$)", re.DOTALL)
         code_blocks = code_block_pattern.findall(chat_message)
         non_code_parts = code_block_pattern.split(chat_message)[::2]
-        result = []  
+        result = []
         for non_code, code in zip(non_code_parts, code_blocks + [""]):
             if non_code.strip():
                 result.append(non_code)
@@ -350,55 +351,95 @@ def construct_assistant(text):
 
 
 def save_file(filename, system, history, chatbot, user_name):
-    logging.debug(f"{user_name} 保存对话历史中……")
     os.makedirs(os.path.join(HISTORY_DIR, user_name), exist_ok=True)
-    if filename.endswith(".json"):
-        json_s = {"system": system, "history": history, "chatbot": chatbot}
-        if "/" in filename or "\\" in filename:
-            history_file_path = filename
-        else:
-            history_file_path = os.path.join(HISTORY_DIR, user_name, filename)
-        with open(history_file_path, "w", encoding='utf-8') as f:
-            json.dump(json_s, f, ensure_ascii=False)
-    elif filename.endswith(".md"):
-        md_s = f"system: \n- {system} \n"
-        for data in history:
-            md_s += f"\n{data['role']}: \n- {data['content']} \n"
-        with open(os.path.join(HISTORY_DIR, user_name, filename), "w", encoding="utf8") as f:
-            f.write(md_s)
-    logging.debug(f"{user_name} 保存对话历史完毕")
+    if filename.endswith(".md"):
+        filename = filename[:-3]
+    if not filename.endswith(".json") and not filename.endswith(".md"):
+        filename += ".json"
+    if filename == ".json":
+        raise Exception("文件名不能为空")
+
+    json_s = {"system": system, "history": history, "chatbot": chatbot}
+    repeat_file_index = 2
+    if not filename == os.path.basename(filename):
+        history_file_path = filename
+    else:
+        history_file_path = os.path.join(HISTORY_DIR, user_name, filename)
+
+    with open(history_file_path, "w", encoding='utf-8') as f:
+        json.dump(json_s, f, ensure_ascii=False)
+
+    filename = os.path.basename(filename)
+    filename_md = filename[:-5] + ".md"
+    md_s = f"system: \n- {system} \n"
+    for data in history:
+        md_s += f"\n{data['role']}: \n- {data['content']} \n"
+    with open(os.path.join(HISTORY_DIR, user_name, filename_md), "w", encoding="utf8") as f:
+        f.write(md_s)
     return os.path.join(HISTORY_DIR, user_name, filename)
 
 
 def sorted_by_pinyin(list):
     return sorted(list, key=lambda char: lazy_pinyin(char)[0][0])
 
+def sorted_by_last_modified_time(list, dir):
+    return sorted(list, key=lambda char: os.path.getctime(os.path.join(dir, char)), reverse=True)
 
-def get_file_names(dir, plain=False, filetypes=[".json"]):
-    logging.debug(f"获取文件名列表，目录为{dir}，文件类型为{filetypes}，是否为纯文本列表{plain}")
+def get_file_names_by_type(dir, filetypes=[".json"]):
+    logging.debug(f"获取文件名列表，目录为{dir}，文件类型为{filetypes}")
     files = []
-    try:
-        for type in filetypes:
-            files += [f for f in os.listdir(dir) if f.endswith(type)]
-    except FileNotFoundError:
-        files = []
-    files = sorted_by_pinyin(files)
-    if files == []:
-        files = [""]
+    for type in filetypes:
+        files += [f for f in os.listdir(dir) if f.endswith(type)]
     logging.debug(f"files are:{files}")
-    if plain:
-        return files
-    else:
-        return gr.Dropdown.update(choices=files)
+    return files
+
+def get_file_names_by_pinyin(dir, filetypes=[".json"]):
+    files = get_file_names_by_type(dir, filetypes)
+    if files != [""]:
+        files = sorted_by_pinyin(files)
+    logging.debug(f"files are:{files}")
+    return files
+
+def get_file_names_dropdown_by_pinyin(dir, filetypes=[".json"]):
+    files = get_file_names_by_pinyin(dir, filetypes)
+    return gr.Dropdown.update(choices=files)
+
+def get_file_names_by_last_modified_time(dir, filetypes=[".json"]):
+    files = get_file_names_by_type(dir, filetypes)
+    if files != [""]:
+        files = sorted_by_last_modified_time(files, dir)
+    logging.debug(f"files are:{files}")
+    return files
 
 
-def get_history_names(plain=False, user_name=""):
+def get_history_names(user_name=""):
     logging.debug(f"从用户 {user_name} 中获取历史记录文件名列表")
     if user_name == "" and hide_history_when_not_logged_in:
-        return ""
+        return []
     else:
-        return get_file_names(os.path.join(HISTORY_DIR, user_name), plain)
+        history_files = get_file_names_by_last_modified_time(os.path.join(HISTORY_DIR, user_name))
+        history_files = [f[:f.rfind(".")] for f in history_files]
+        return history_files
 
+def get_first_history_name(user_name=""):
+    history_names = get_history_names(user_name)
+    return history_names[0] if history_names else None
+
+def get_history_list(user_name=""):
+    history_names = get_history_names(user_name)
+    return gr.Radio.update(choices=history_names)
+
+def init_history_list(user_name=""):
+    history_names = get_history_names(user_name)
+    return gr.Radio.update(choices=history_names, value=history_names[0] if history_names else "")
+
+def filter_history(user_name, keyword):
+    history_names = get_history_names(user_name)
+    try:
+        history_names = [name for name in history_names if re.search(keyword, name)]
+        return gr.update(choices=history_names)
+    except:
+        return gr.update(choices=history_names)
 
 def load_template(filename, mode=0):
     logging.debug(f"加载模板文件{filename}，模式为{mode}（0为返回字典和下拉菜单，1为返回下拉菜单，2为返回字典）")
@@ -425,9 +466,14 @@ def load_template(filename, mode=0):
         )
 
 
-def get_template_names(plain=False):
+def get_template_names():
     logging.debug("获取模板文件名列表")
-    return get_file_names(TEMPLATES_DIR, plain, filetypes=[".csv", "json"])
+    return get_file_names_by_pinyin(TEMPLATES_DIR, filetypes=[".csv", "json"])
+
+def get_template_dropdown():
+    logging.debug("获取模板下拉菜单")
+    template_names = get_template_names()
+    return gr.Dropdown.update(choices=template_names)
 
 
 def get_template_content(templates, selection, original_system_prompt):
@@ -633,36 +679,21 @@ def toggle_like_btn_visibility(selected_model_name):
     else:
         return gr.update(visible=False)
 
-def new_auto_history_filename(dirname):
-    latest_file = get_latest_filepath(dirname)
+def new_auto_history_filename(username):
+    latest_file = get_first_history_name(username)
     if latest_file:
-        with open(os.path.join(dirname, latest_file), 'r', encoding="utf-8") as f:
+        with open(os.path.join(HISTORY_DIR, username, latest_file + ".json"), 'r', encoding="utf-8") as f:
             if len(f.read()) == 0:
                 return latest_file
-    now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    now = i18n("新对话 ") + datetime.datetime.now().strftime('%m-%d %H-%M')
     return f'{now}.json'
-
-def get_latest_filepath(dirname):
-    pattern = re.compile(r'\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}')
-    latest_time = None
-    latest_file = None
-    for filename in os.listdir(dirname):
-        if os.path.isfile(os.path.join(dirname, filename)):
-            match = pattern.search(filename)
-            if match and match.group(0) == filename[:19]:
-                time_str = filename[:19]
-                filetime = datetime.datetime.strptime(time_str, '%Y-%m-%d_%H-%M-%S')
-                if not latest_time or filetime > latest_time:
-                    latest_time = filetime
-                    latest_file = filename
-    return latest_file
 
 def get_history_filepath(username):
     dirname = os.path.join(HISTORY_DIR, username)
     os.makedirs(dirname, exist_ok=True)
-    latest_file = get_latest_filepath(dirname)
+    latest_file = get_first_history_name(username)
     if not latest_file:
-        latest_file = new_auto_history_filename(dirname)
+        latest_file = new_auto_history_filename(username)
 
     latest_file = os.path.join(dirname, latest_file)
     return latest_file
@@ -687,3 +718,27 @@ def auth_from_conf(username, password):
         return False
     except:
         return False
+
+def get_file_hash(file_src=None, file_paths=None):
+    if file_src:
+        file_paths = [x.name for x in file_src]
+    file_paths.sort(key=lambda x: os.path.basename(x))
+
+    md5_hash = hashlib.md5()
+    for file_path in file_paths:
+        with open(file_path, "rb") as f:
+            while chunk := f.read(8192):
+                md5_hash.update(chunk)
+
+    return md5_hash.hexdigest()
+
+def myprint(**args):
+    print(args)
+
+def replace_special_symbols(string, replace_string=" "):
+    # 定义正则表达式，匹配所有特殊符号
+    pattern = r'[!@#$%^&*()<>?/\|}{~:]'
+
+    new_string = re.sub(pattern, replace_string, string)
+
+    return new_string

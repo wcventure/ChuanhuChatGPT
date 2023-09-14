@@ -36,6 +36,7 @@ BILLING_NOT_APPLICABLE_MSG = i18n("账单信息不适用") # 本地运行的模�
 TIMEOUT_STREAMING = 60  # 流式对话时的超时时间
 TIMEOUT_ALL = 200  # 非流式对话时的超时时间
 ENABLE_STREAMING_OPTION = True  # 是否启用选择选择是否实时显示回答的勾选框
+ENABLE_LLM_NAME_CHAT_OPTION = True  # 是否启用选择是否使用LLM模型的勾选框
 HIDE_MY_KEY = False  # 如果你想在UI中隐藏你的 API 密钥，将此值设置为 True
 CONCURRENT_COUNT = 100 # 允许同时使用的用户数量
 
@@ -68,6 +69,9 @@ ONLINE_MODELS = [
     "yuanai-1.0-rhythm_poems",
     "minimax-abab4-chat",
     "minimax-abab5-chat",
+    "midjourney",
+    "讯飞星火大模型V2.0",
+    "讯飞星火大模型V1.5"
 ]
 
 LOCAL_MODELS = [
@@ -128,6 +132,12 @@ REPLY_LANGUAGES = [
     "跟随问题语言（不稳定）"
 ]
 
+HISTORY_NAME_METHODS = [
+    i18n("根据日期时间"), 
+    i18n("第一条提问"), 
+    i18n("模型自动总结（消耗tokens）"),
+]
+
 
 WEBSEARCH_PTOMPT_TEMPLATE = """\
 Web search results:
@@ -172,6 +182,15 @@ SUMMARIZE_PROMPT = """Write a concise summary of the following:
 {text}
 
 CONCISE SUMMARY IN 中文:"""
+
+SUMMARY_CHAT_SYSTEM_PROMPT = """\
+Please summarize the following conversation for a chat topic.
+No more than 16 characters.
+No special characters.
+Punctuation mark is banned.
+Not including '.' ':' '?' '!' '“' '*' '<' '>'.
+Reply in user's language.
+"""
 
 ALREADY_CONVERTED_MARK = "<!-- ALREADY CONVERTED BY PARSER. -->"
 START_OF_OUTPUT_MARK = "<!-- SOO IN MESSAGE -->"
@@ -241,6 +260,8 @@ small_and_beautiful_theme = gr.themes.Soft(
         block_title_background_fill_dark="*primary_900",
         block_label_background_fill_dark="*primary_900",
         input_background_fill="#F6F6F6",
-        chatbot_code_background_color="*neutral_950",
+        # chatbot_code_background_color="*neutral_950",
+        # gradio 会把这个几个chatbot打头的变量应用到其他md渲染的地方，鬼晓得怎么想的。。。
         chatbot_code_background_color_dark="*neutral_950",
     )
+
