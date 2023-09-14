@@ -39,17 +39,11 @@ with gr.Blocks(theme=small_and_beautiful_theme) as demo:
     current_model = gr.State()
 
     topic = gr.State(i18n("未命名对话历史记录"))
-<<<<<<< HEAD
-    
-    with gr.Row():
-        #gr.Markdown("### 交互式AI对话系统，创新引领智慧未来", elem_id="app_title")
-        gr.HTML(CHUANHU_TITLE, elem_id="app-title")
-=======
 
     with gr.Row(elem_id="chuanhu-header"):
+        #gr.Markdown("### 交互式AI对话系统，创新引领智慧未来", elem_id="app_title")
         gr.HTML(get_html("header_title.html").format(
             app_title=CHUANHU_TITLE), elem_id="app-title")
->>>>>>> upstream/main
         status_display = gr.Markdown(get_geoip(), elem_id="status-display")
     with gr.Row(elem_id="float-display"):
         user_info = gr.Markdown(
@@ -61,56 +55,6 @@ with gr.Blocks(theme=small_and_beautiful_theme) as demo:
             update_btn=i18n("更新"),
             seenew_btn=i18n("详情"),
             ok_btn=i18n("好"),
-<<<<<<< HEAD
-            ), visible=check_update)
-    with gr.Row(equal_height=True):
-        with gr.Column(scale=5):
-            with gr.Row():
-                chatbot = gr.Chatbot(label="Chuanhu Chat", elem_id="chuanhu-chatbot", latex_delimiters=latex_delimiters_set, height=700)
-            with gr.Row():
-                with gr.Column(min_width=225, scale=12):
-                    user_input = gr.Textbox(
-                        elem_id="user-input-tb",
-                        show_label=False, placeholder=i18n("在这里输入"),
-                        container=False,
-                        lines = 2
-                    )
-                with gr.Column(min_width=42, scale=1):
-                    submitBtn = gr.Button(value="", variant="primary", elem_id="submit-btn")
-                    cancelBtn = gr.Button(value="", variant="secondary", visible=False, elem_id="cancel-btn")
-            with gr.Row():
-                with gr.Column(min_width=120, scale=1):
-                    emptyBtn = gr.Button(
-                        i18n("🧹 新的对话"), elem_id="empty-btn"
-                    )
-                with gr.Column(min_width=120, scale=1):
-                    retryBtn = gr.Button(i18n("🔄 重新生成"))
-                with gr.Column(min_width=120, scale=1):
-                    delFirstBtn = gr.Button(i18n("🗑️ 删除最旧对话"))
-                with gr.Column(min_width=120, scale=1):
-                    delLastBtn = gr.Button(i18n("🗑️ 删除最新对话"))
-                with gr.Row(visible=False) as like_dislike_area:
-                    with gr.Column(min_width=20, scale=1):
-                        likeBtn = gr.Button(i18n("👍"))
-                    with gr.Column(min_width=20, scale=1):
-                        dislikeBtn = gr.Button(i18n("👎"))
-
-        with gr.Column():
-            with gr.Column(min_width=50, scale=1):
-                with gr.Tab(label=i18n("模型")):
-                    keyTxt = gr.Textbox(
-                        show_label=True,
-                        placeholder=f"Your API-key...",
-                        value=hide_middle_chars(user_api_key.value), #my_api_key, 
-                        type="password",
-                        visible=not HIDE_MY_KEY,
-                        label="API-Key",
-                    )
-                    if multi_api_key:
-                        usageTxt = gr.Markdown(i18n("多账号模式已开启，无需输入key，可直接开始对话"), elem_id="usage-display", elem_classes="insert-block", visible=show_api_billing)
-                    else:
-                        usageTxt = gr.Markdown(i18n("**发送消息** 或 **提交key** 以显示额度"), elem_id="usage-display", elem_classes="insert-block", visible=show_api_billing)
-=======
         ), visible=check_update)
 
     with gr.Row(equal_height=True, elem_id="chuanhu-body"):
@@ -174,7 +118,6 @@ with gr.Blocks(theme=small_and_beautiful_theme) as demo:
         with gr.Column(elem_id="chuanhu-area", scale=5):
             with gr.Column(elem_id="chatbot-area"):
                 with gr.Row(elem_id="chatbot-header"):
->>>>>>> upstream/main
                     model_select_dropdown = gr.Dropdown(
                         label=i18n("选择模型"), choices=MODELS, multiselect=False, value=MODELS[DEFAULT_MODEL], interactive=True,
                         show_label=False, container=False, elem_id="model-select-dropdown"
@@ -214,6 +157,7 @@ with gr.Blocks(theme=small_and_beautiful_theme) as demo:
                                         show_label=False,
                                         placeholder=i18n("在这里输入"),
                                         elem_classes="no-container",
+                                        lines = 2,
                                         max_lines=5,
                                         # container=False
                                     )
@@ -618,15 +562,6 @@ with gr.Blocks(theme=small_and_beautiful_theme) as demo:
         fn=get_history_list, inputs=[user_name], outputs=[historySelectList]
     )
 
-<<<<<<< HEAD
-    # Chatbot
-    cancelBtn.click(interrupt, [current_model], [])
-
-    user_input.submit(**transfer_input_args).then(**set_postprocess_args).then(**chatgpt_predict_args).then(**end_outputing_args)
-    user_input.submit(**get_usage_args)
-
-    submitBtn.click(**transfer_input_args).then(**set_postprocess_args).then(**chatgpt_predict_args, api_name="predict").then(**end_outputing_args)
-=======
     auto_name_chat_history_args = dict(
         fn=auto_name_chat_history,
         inputs=[current_model, name_chat_method, user_question, chatbot, user_name, single_turn_checkbox],
@@ -637,15 +572,14 @@ with gr.Blocks(theme=small_and_beautiful_theme) as demo:
     # Chatbot
     cancelBtn.click(interrupt, [current_model], [])
 
-    user_input.submit(**transfer_input_args).then(**
+    user_input.submit(**transfer_input_args).then(**set_postprocess_args).then(**
                                                   chatgpt_predict_args).then(**end_outputing_args).then(**auto_name_chat_history_args)
     user_input.submit(**get_usage_args)
 
     # user_input.submit(auto_name_chat_history, [current_model, user_question, chatbot, user_name], [historySelectList], show_progress=False)
 
-    submitBtn.click(**transfer_input_args).then(**chatgpt_predict_args,
+    submitBtn.click(**transfer_input_args).then(**set_postprocess_args).then(**chatgpt_predict_args,
                                                 api_name="predict").then(**end_outputing_args).then(**auto_name_chat_history_args)
->>>>>>> upstream/main
     submitBtn.click(**get_usage_args)
 
     # submitBtn.click(auto_name_chat_history, [current_model, user_question, chatbot, user_name], [historySelectList], show_progress=False)
