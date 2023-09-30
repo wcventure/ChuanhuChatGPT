@@ -1,6 +1,6 @@
 
 from collections import namedtuple
-import os
+import os,sys
 import gradio as gr
 
 from . import shared
@@ -23,7 +23,7 @@ def webpath(fn):
         web_path = os.path.relpath(fn, shared.chuanhu_path).replace('\\', '/')
     else:
         web_path = os.path.abspath(fn)
-    return f'file={web_path}?{os.path.getmtime(fn)}'
+    return f'file=ChuanhuChatGPT/{web_path}?{os.path.getmtime(fn)}'
 
 ScriptFile = namedtuple("ScriptFile", ["basedir", "filename", "path"])
 

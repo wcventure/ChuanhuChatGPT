@@ -1,4 +1,4 @@
-import os
+import os, sys
 import json
 import re
 
@@ -6,13 +6,13 @@ import re
 pattern = r'i18n\((\"{3}.*?\"{3}|\".*?\")\)'
 
 # Load the .py file
-with open('ChuanhuChatbot.py', 'r', encoding='utf-8') as f:
+with open('ChuanhuChatGPT/ChuanhuChatbot.py', 'r', encoding='utf-8') as f:
     contents = f.read()
 
 # Load the .py files in the modules folder
-for filename in os.listdir("modules"):
+for filename in os.listdir("ChuanhuChatGPT/modules"):
     if filename.endswith(".py"):
-        with open(os.path.join("modules", filename), "r", encoding="utf-8") as f:
+        with open(os.path.join("ChuanhuChatGPT/modules", filename), "r", encoding="utf-8") as f:
             contents += f.read()
 
 # Matching with regular expressions
