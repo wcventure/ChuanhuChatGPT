@@ -202,13 +202,13 @@ def retrieve_proxy(proxy=None):
         https_proxy = proxy
         yield http_proxy, https_proxy
     else:
-        old_var = os.environ["HTTP_PROXY"], os.environ["HTTPS_PROXY"]
-        os.environ["HTTP_PROXY"] = http_proxy
-        os.environ["HTTPS_PROXY"] = https_proxy
+        old_var = os.environ["http_proxy"], os.environ["https_proxy"]
+        os.environ["http_proxy"] = http_proxy
+        os.environ["https_proxy"] = https_proxy
         yield http_proxy, https_proxy  # return new proxy
 
         # return old proxy
-        os.environ["HTTP_PROXY"], os.environ["HTTPS_PROXY"] = old_var
+        os.environ["http_proxy"], os.environ["https_proxy"] = old_var
 
 
 # 处理latex options
