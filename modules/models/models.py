@@ -49,6 +49,18 @@ def get_model(
                 top_p=top_p,
                 user_name=user_name,
             )
+        elif model_type == ModelType.OpenAIInstruct:
+            logging.info(f"正在加载OpenAI Instruct模型: {model_name}")
+            from .OpenAIInstruct import OpenAI_Instruct_Client
+            access_key = os.environ.get("OPENAI_API_KEY", access_key)
+            model = OpenAI_Instruct_Client(
+                model_name, api_key=access_key, user_name=user_name)
+        elif model_type == ModelType.OpenAIVision:
+            logging.info(f"正在加载OpenAI Vision模型: {model_name}")
+            from .OpenAIVision import OpenAIVisionClient
+            access_key = os.environ.get("OPENAI_API_KEY", access_key)
+            model = OpenAIVisionClient(
+                model_name, api_key=access_key, user_name=user_name)
         elif model_type == ModelType.ChatGLM:
             logging.info(f"正在加载ChatGLM模型: {model_name}")
             from .ChatGLM import ChatGLM_Client
@@ -112,6 +124,12 @@ def get_model(
             from .spark import Spark_Client
             model = Spark_Client(model_name, os.getenv("SPARK_APPID"), os.getenv(
                 "SPARK_API_KEY"), os.getenv("SPARK_API_SECRET"), user_name=user_name)
+        elif model_type == ModelType.Claude:
+            from .Claude import Claude_Client
+            model = Claude_Client(model_name="claude-2", api_secret=os.getenv("CLAUDE_API_SECRET"))
+        elif model_type == ModelType.Qwen:
+            from .Qwen import Qwen_Client
+            model = Qwen_Client(model_name, user_name=user_name)
         elif model_type == ModelType.Unknown:
             raise ValueError(f"未知模型: {model_name}")
         logging.info(msg)

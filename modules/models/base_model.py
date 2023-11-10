@@ -144,12 +144,17 @@ class ModelType(Enum):
     LangchainChat = 10
     Midjourney = 11
     Spark = 12
+    OpenAIInstruct = 13
+    Claude = 14
+    Qwen = 15
+    OpenAIVision = 16
 
     @classmethod
     def get_type(cls, model_name: str):
         model_type = None
         model_name_lower = model_name.lower()
         if "gpt" in model_name_lower:
+<<<<<<< HEAD
             model_type = ModelType.OpenAI
         elif "code-" in model_name_lower:
             model_type = ModelType.OpenAI
@@ -157,6 +162,14 @@ class ModelType(Enum):
             model_type = ModelType.OpenAI
         elif "concurrency-" in model_name_lower:
             model_type = ModelType.OpenAI
+=======
+            if "instruct" in model_name_lower:
+                model_type = ModelType.OpenAIInstruct
+            elif "vision" in model_name_lower:
+                model_type = ModelType.OpenAIVision
+            else:
+                model_type = ModelType.OpenAI
+>>>>>>> upstream/main
         elif "chatglm" in model_name_lower:
             model_type = ModelType.ChatGLM
         elif "llama" in model_name_lower or "alpaca" in model_name_lower:
@@ -181,6 +194,10 @@ class ModelType(Enum):
             model_type = ModelType.LangchainChat
         elif "星火大模型" in model_name_lower:
             model_type = ModelType.Spark
+        elif "claude" in model_name_lower:
+            model_type = ModelType.Claude
+        elif "qwen" in model_name_lower:
+            model_type = ModelType.Qwen
         else:
             model_type = ModelType.LLaMA
         return model_type
@@ -206,7 +223,7 @@ class BaseLLMModel:
         self.model_name = model_name
         self.model_type = ModelType.get_type(model_name)
         try:
-            self.token_upper_limit = MODEL_TOKEN_LIMIT[model_name]
+            self.token_upper_limit = MODEL_METADATA[model_name]["token_limit"]
         except KeyError:
             self.token_upper_limit = DEFAULT_TOKEN_LIMIT
         self.interrupted = False
@@ -263,7 +280,7 @@ class BaseLLMModel:
 
     def billing_info(self):
         """get billing infomation, inplement if needed"""
-        logging.warning("billing info not implemented, using default")
+        # logging.warning("billing info not implemented, using default")
         return BILLING_NOT_APPLICABLE_MSG
 
     def count_token(self, user_input):
@@ -358,41 +375,54 @@ class BaseLLMModel:
             chatbot.append([i18n("上传了")+str(len(files))+"个文件", summary])
         return chatbot, status
 
-    def prepare_inputs(self, real_inputs, use_websearch, files, reply_language, chatbot):
-        fake_inputs = None
+    def prepare_inputs(self, real_inputs, use_websearch, files, reply_language, chatbot, load_from_cache_if_possible=True):
         display_append = []
         limited_context = False
-        fake_inputs = real_inputs
+        if type(real_inputs) == list:
+            fake_inputs = real_inputs[0]['text']
+        else:
+            fake_inputs = real_inputs
         if files:
             from langchain.embeddings.huggingface import HuggingFaceEmbeddings
             from langchain.vectorstores.base import VectorStoreRetriever
             limited_context = True
             msg = "加载索引中……"
             logging.info(msg)
-            index = construct_index(self.api_key, file_src=files)
+            index = construct_index(self.api_key, file_src=files, load_from_cache_if_possible=load_from_cache_if_possible)
             assert index is not None, "获取索引失败"
             msg = "索引获取成功，生成回答中……"
             logging.info(msg)
             with retrieve_proxy():
                 retriever = VectorStoreRetriever(vectorstore=index, search_type="similarity_score_threshold", search_kwargs={
                                                  "k": 6, "score_threshold": 0.5})
-                relevant_documents = retriever.get_relevant_documents(
-                    real_inputs)
+                try:
+                    relevant_documents = retriever.get_relevant_documents(
+                        fake_inputs)
+                except AssertionError:
+                    return self.prepare_inputs(fake_inputs, use_websearch, files, reply_language, chatbot, load_from_cache_if_possible=False)
             reference_results = [[d.page_content.strip("�"), os.path.basename(
                 d.metadata["source"])] for d in relevant_documents]
             reference_results = add_source_numbers(reference_results)
             display_append = add_details(reference_results)
             display_append = "\n\n" + "".join(display_append)
-            real_inputs = (
-                replace_today(PROMPT_TEMPLATE)
-                .replace("{query_str}", real_inputs)
-                .replace("{context_str}", "\n\n".join(reference_results))
-                .replace("{reply_language}", reply_language)
-            )
+            if type(real_inputs) == list:
+                real_inputs[0]["text"] = (
+                    replace_today(PROMPT_TEMPLATE)
+                    .replace("{query_str}", fake_inputs)
+                    .replace("{context_str}", "\n\n".join(reference_results))
+                    .replace("{reply_language}", reply_language)
+                )
+            else:
+                real_inputs = (
+                    replace_today(PROMPT_TEMPLATE)
+                    .replace("{query_str}", real_inputs)
+                    .replace("{context_str}", "\n\n".join(reference_results))
+                    .replace("{reply_language}", reply_language)
+                )
         elif use_websearch:
             search_results = []
             with DDGS() as ddgs:
-                ddgs_gen = ddgs.text(real_inputs, backend="lite")
+                ddgs_gen = ddgs.text(fake_inputs, backend="lite")
                 for r in islice(ddgs_gen, 10):
                     search_results.append(r)
             reference_results = []
@@ -408,12 +438,20 @@ class BaseLLMModel:
             # display_append = "<ol>\n\n" + "".join(display_append) + "</ol>"
             display_append = '<div class = "source-a">' + \
                 "".join(display_append) + '</div>'
-            real_inputs = (
-                replace_today(WEBSEARCH_PTOMPT_TEMPLATE)
-                .replace("{query}", real_inputs)
-                .replace("{web_results}", "\n\n".join(reference_results))
-                .replace("{reply_language}", reply_language)
-            )
+            if type(real_inputs) == list:
+                real_inputs[0]["text"] = (
+                    replace_today(WEBSEARCH_PTOMPT_TEMPLATE)
+                    .replace("{query}", fake_inputs)
+                    .replace("{web_results}", "\n\n".join(reference_results))
+                    .replace("{reply_language}", reply_language)
+                )
+            else:
+                real_inputs = (
+                    replace_today(WEBSEARCH_PTOMPT_TEMPLATE)
+                    .replace("{query}", fake_inputs)
+                    .replace("{web_results}", "\n\n".join(reference_results))
+                    .replace("{reply_language}", reply_language)
+                )
         else:
             display_append = ""
         return limited_context, fake_inputs, display_append, real_inputs, chatbot
@@ -430,12 +468,21 @@ class BaseLLMModel:
     ):  # repetition_penalty, top_k
 
         status_text = "开始生成回答……"
-        logging.info(
-            "用户" + f"{self.user_identifier}" + "的输入为：" +
-            colorama.Fore.BLUE + f"{inputs}" + colorama.Style.RESET_ALL
-        )
+        if type(inputs) == list:
+                logging.info(
+                "用户" + f"{self.user_identifier}" + "的输入为：" +
+                colorama.Fore.BLUE + "(" + str(len(inputs)-1) + " images) " + f"{inputs[0]['text']}" + colorama.Style.RESET_ALL
+            )
+        else:
+            logging.info(
+                "用户" + f"{self.user_identifier}" + "的输入为：" +
+                colorama.Fore.BLUE + f"{inputs}" + colorama.Style.RESET_ALL
+            )
         if should_check_token_count:
-            yield chatbot + [(inputs, "")], status_text
+            if type(inputs) == list:
+                 yield chatbot + [(inputs[0]['text'], "")], status_text
+            else:
+                yield chatbot + [(inputs, "")], status_text
         if reply_language == "跟随问题语言（不稳定）":
             reply_language = "the same language as the question, such as English, 中文, 日本語, Español, Français, or Deutsch."
 
@@ -450,26 +497,30 @@ class BaseLLMModel:
         ):
             status_text = STANDARD_ERROR_MSG + NO_APIKEY_MSG
             logging.info(status_text)
-            chatbot.append((inputs, ""))
+            chatbot.append((fake_inputs, ""))
             if len(self.history) == 0:
-                self.history.append(construct_user(inputs))
+                self.history.append(construct_user(fake_inputs))
                 self.history.append("")
                 self.all_token_counts.append(0)
             else:
-                self.history[-2] = construct_user(inputs)
-            yield chatbot + [(inputs, "")], status_text
+                self.history[-2] = construct_user(fake_inputs)
+            yield chatbot + [(fake_inputs, "")], status_text
             return
-        elif len(inputs.strip()) == 0:
+        elif len(fake_inputs.strip()) == 0:
             status_text = STANDARD_ERROR_MSG + NO_INPUT_MSG
             logging.info(status_text)
-            yield chatbot + [(inputs, "")], status_text
+            yield chatbot + [(fake_inputs, "")], status_text
             return
 
         if self.single_turn:
             self.history = []
             self.all_token_counts = []
-        self.history.append(construct_user(inputs))
-        
+
+        if type(inputs) == list:
+            self.history.append(inputs)
+        else:
+            self.history.append(construct_user(inputs))
+
         try:
             if stream:
                 logging.debug("使用流式传输")
@@ -494,8 +545,8 @@ class BaseLLMModel:
             traceback.print_exc()
             status_text = STANDARD_ERROR_MSG + beautify_err_msg(str(e))
             yield chatbot, status_text
-        
-        if len(self.history) > 1 and self.history[-1]["content"] != inputs:
+
+        if len(self.history) > 1 and self.history[-1]["content"] != fake_inputs:
             logging.info(
                 "回答为："
                 + colorama.Fore.BLUE
@@ -643,14 +694,15 @@ class BaseLLMModel:
     def set_single_turn(self, new_single_turn):
         self.single_turn = new_single_turn
 
-    def reset(self):
+    def reset(self, remain_system_prompt=False):
         self.history = []
         self.all_token_counts = []
         self.interrupted = False
         self.history_file_path = new_auto_history_filename(self.user_identifier)
         history_name = self.history_file_path[:-5]
         choices = [history_name] + get_history_names(self.user_identifier)
-        return [], self.token_message([0]), gr.Radio.update(choices=choices, value=history_name), ""
+        system_prompt = self.system_prompt if remain_system_prompt else ""
+        return [], self.token_message([0]), gr.Radio.update(choices=choices, value=history_name), system_prompt
 
     def delete_first_conversation(self):
         if self.history:
@@ -661,14 +713,13 @@ class BaseLLMModel:
     def delete_last_conversation(self, chatbot):
         if len(chatbot) > 0 and STANDARD_ERROR_MSG in chatbot[-1][1]:
             msg = "由于包含报错信息，只删除chatbot记录"
-            chatbot.pop()
+            chatbot = chatbot[:-1]
             return chatbot, self.history
         if len(self.history) > 0:
-            self.history.pop()
-            self.history.pop()
+            self.history = self.history[:-2]
         if len(chatbot) > 0:
             msg = "删除了一组chatbot对话"
-            chatbot.pop()
+            chatbot = chatbot[:-1]
         if len(self.all_token_counts) > 0:
             msg = "删除了一组对话的token计数记录"
             self.all_token_counts.pop()
@@ -705,6 +756,8 @@ class BaseLLMModel:
     def auto_name_chat_history(self, name_chat_method, user_question, chatbot, user_name, single_turn_checkbox):
         if len(self.history) == 2 and not single_turn_checkbox:
             user_question = self.history[0]["content"]
+            if type(user_question) == list:
+                user_question = user_question[0]["text"]
             filename = replace_special_symbols(user_question)[:16] + ".json"
             return self.rename_chat_history(filename, chatbot, user_name)
         else:
@@ -755,6 +808,10 @@ class BaseLLMModel:
                     logging.info(new_history)
             except:
                 pass
+            if len(json_s["chatbot"]) < len(json_s["history"]):
+                logging.info("Trimming corrupted history...")
+                json_s["history"] = json_s["history"][-len(json_s["chatbot"]):]
+                logging.info(f"Trimmed history: {json_s['history']}")
             logging.debug(f"{self.user_identifier} 加载对话历史完毕")
             self.history = json_s["history"]
             return os.path.basename(self.history_file_path), json_s["system"], json_s["chatbot"]
