@@ -154,22 +154,12 @@ class ModelType(Enum):
         model_type = None
         model_name_lower = model_name.lower()
         if "gpt" in model_name_lower:
-<<<<<<< HEAD
-            model_type = ModelType.OpenAI
-        elif "code-" in model_name_lower:
-            model_type = ModelType.OpenAI
-        elif "spec-" in model_name_lower or "specification-" in model_name_lower:
-            model_type = ModelType.OpenAI
-        elif "concurrency-" in model_name_lower:
-            model_type = ModelType.OpenAI
-=======
             if "instruct" in model_name_lower:
                 model_type = ModelType.OpenAIInstruct
             elif "vision" in model_name_lower:
                 model_type = ModelType.OpenAIVision
             else:
                 model_type = ModelType.OpenAI
->>>>>>> upstream/main
         elif "chatglm" in model_name_lower:
             model_type = ModelType.ChatGLM
         elif "llama" in model_name_lower or "alpaca" in model_name_lower:
